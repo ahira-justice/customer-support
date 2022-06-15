@@ -1,0 +1,9 @@
+version: "3.4"
+
+services:
+  retail:
+    env_file:
+      - .dockerenv
+    ports:
+      - "32620:80"
+      - "32621:443"
