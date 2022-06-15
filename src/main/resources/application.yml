@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${env.DATABASE_URL}
+    username: ${env.DATABASE_USER}
+    password: ${env.DATABASE_PASSWORD}
+  web:
+    resources:
+      add-mappings: false
+  mvc:
+    throw-exception-if-no-handler-found: true
+
+
+server:
+  port: ${env.PORT}
+  error:
+    whitelabel:
+      enabled: false
+
+
+springdoc:
+  api-docs:
+    path: /api/customer-support/docs
+  swagger-ui:
+    path: /api/customer-support/index.html
+    tagsSorter: alpha
+    operationsSorter: method
+  packages-to-exclude: "com.ahirajustice.customersupport.entities,"
+
+
