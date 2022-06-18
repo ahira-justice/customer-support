@@ -2,12 +2,14 @@ package com.ahirajustice.customersupport;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
-public class CustomerSupportApplication {
+@EnableJpaAuditing
+public class Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(CustomerSupportApplication.class, args);
+        SpringApplication.run(Application.class, args);
     }
 
 }

@@ -1,4 +1,6 @@
 spring:
+  flyway:
+    locations: "classpath:db.migration"
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${env.DATABASE_URL}
@@ -28,3 +30,12 @@ springdoc:
   packages-to-exclude: "com.ahirajustice.customersupport.entities,"
 
 
+app:
+  config:
+    access-token-expire-minutes: ${env.ACCESS_TOKEN_EXPIRE_MINUTES}
+    secret-key: ${env.SECRET_KEY}
+    superuser:
+      email: ${env.SUPERUSER_EMAIL}
+      first-name: ${env.SUPERUSER_FIRST_NAME}
+      last-name: ${env.SUPERUSER_LAST_NAME}
+      password: ${env.SUPERUSER_PASSWORD}
