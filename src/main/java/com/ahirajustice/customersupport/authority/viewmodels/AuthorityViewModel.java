@@ -1,28 +1,20 @@
 package com.ahirajustice.customersupport.authority.viewmodels;
 
-
 import com.ahirajustice.customersupport.common.viewmodels.BaseViewModel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AuthorityViewModel extends BaseViewModel {
 
     private String name;
-
     private boolean isSystem;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean isSystem() {
-        return isSystem;
-    }
-
-    public void setSystem(boolean isSystem) {
-        this.isSystem = isSystem;
-    }
 
 }
