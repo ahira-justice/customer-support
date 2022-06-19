@@ -27,7 +27,7 @@ import javax.validation.Valid;
 import static com.ahirajustice.customersupport.common.constants.AuthorityConstants.AUTH_PREFIX;
 import static com.ahirajustice.customersupport.common.constants.AuthorityConstants.AUTH_SUFFIX;
 
-@Tag(name = "Conversations")
+@Tag(name = "Messages")
 @RestController
 @RequestMapping("api/messages")
 @RequiredArgsConstructor
