@@ -2,6 +2,7 @@ package com.ahirajustice.customersupport.conversation.services.impl;
 
 import com.ahirajustice.customersupport.common.entities.Conversation;
 import com.ahirajustice.customersupport.common.entities.User;
+import com.ahirajustice.customersupport.common.enums.ConversationStatus;
 import com.ahirajustice.customersupport.common.repositories.ConversationRepository;
 import com.ahirajustice.customersupport.conversation.requests.InitiateConversationRequest;
 import com.ahirajustice.customersupport.conversation.services.ConversationService;
@@ -36,6 +37,7 @@ public class ConversationServiceImpl implements ConversationService {
     private Conversation buildConversation(User user) {
         return Conversation.builder()
                 .user(user)
+                .status(ConversationStatus.INITIATED)
                 .build();
     }
 
