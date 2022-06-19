@@ -1,6 +1,6 @@
 spring:
   flyway:
-    locations: "classpath:db.migration"
+    locations: "classpath:db/migration"
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${env.DATABASE_URL}
@@ -33,7 +33,8 @@ springdoc:
 app:
   config:
     access-token-expire-minutes: ${env.ACCESS_TOKEN_EXPIRE_MINUTES}
-    secret-key: ${env.SECRET_KEY}
+    public-key: ${env.PUBLIC_KEY}
+    private-key: ${env.PRIVATE_KEY}
     superuser:
       email: ${env.SUPERUSER_EMAIL}
       first-name: ${env.SUPERUSER_FIRST_NAME}
