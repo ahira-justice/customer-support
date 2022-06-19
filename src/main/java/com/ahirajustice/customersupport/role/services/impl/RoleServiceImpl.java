@@ -1,5 +1,6 @@
 package com.ahirajustice.customersupport.role.services.impl;
 
+import com.ahirajustice.customersupport.authority.services.AuthorityService;
 import com.ahirajustice.customersupport.common.entities.Authority;
 import com.ahirajustice.customersupport.common.entities.Role;
 import com.ahirajustice.customersupport.common.entities.User;
@@ -11,8 +12,6 @@ import com.ahirajustice.customersupport.common.exceptions.ValidationException;
 import com.ahirajustice.customersupport.common.repositories.AuthorityRepository;
 import com.ahirajustice.customersupport.common.repositories.RoleRepository;
 import com.ahirajustice.customersupport.common.utils.CommonUtils;
-import com.ahirajustice.customersupport.authority.services.AuthorityService;
-import com.ahirajustice.customersupport.role.mappings.RoleMappings;
 import com.ahirajustice.customersupport.role.requests.RoleCreateRequest;
 import com.ahirajustice.customersupport.role.requests.RoleUpdateRequest;
 import com.ahirajustice.customersupport.role.services.RoleService;
@@ -20,7 +19,6 @@ import com.ahirajustice.customersupport.role.viewmodels.RoleViewModel;
 import com.ahirajustice.customersupport.user.services.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -28,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,19 +37,9 @@ public class RoleServiceImpl implements RoleService {
     private final AuthorityService authorityService;
     private final CurrentUserService currentUserService;
 
-    private final RoleMappings mappings = Mappers.getMapper(RoleMappings.class);
-
-
     public List<RoleViewModel> getRoles() {
-        List<RoleViewModel> responses = new ArrayList<>();
-
         List<Role> roles = roleRepository.findAll();
-
-        for (Role role : roles) {
-            responses.add(mappings.roleToRoleViewModel(role));
-        }
-
-        return responses;
+        return roles.stream().map(RoleViewModel::from).collect(Collectors.toList());
     }
 
     public RoleViewModel getRole(long id) {
@@ -60,7 +49,7 @@ public class RoleServiceImpl implements RoleService {
             throw new NotFoundException(String.format("Role with id: '%d' does not exist", id));
         }
 
-        return mappings.roleToRoleViewModel(roleExists.get());
+        return RoleViewModel.from(roleExists.get());
     }
 
     @Override
@@ -88,12 +77,14 @@ public class RoleServiceImpl implements RoleService {
             authorities.add(authority);
         }
 
-        Role role = mappings.roleCreateRequestToRole(request);
+        Role role = Role.builder()
+                .name(request.getName())
+                .isSystem(request.isSystem())
+                .build();
+
         role.setAuthorities(authorities);
 
-        Role createdRole = roleRepository.save(role);
-
-        return mappings.roleToRoleViewModel(createdRole);
+        return RoleViewModel.from(roleRepository.save(role));
     }
 
     @Override
@@ -121,9 +112,7 @@ public class RoleServiceImpl implements RoleService {
         role.setName(request.getName());
         role.setAuthorities(authorities);
 
-        Role updatedRole = roleRepository.save(role);
-
-        return mappings.roleToRoleViewModel(updatedRole);
+        return RoleViewModel.from(roleRepository.save(role));
     }
 
     private void validate(String name) {

@@ -7,14 +7,12 @@ import com.ahirajustice.customersupport.common.exceptions.BadRequestException;
 import com.ahirajustice.customersupport.common.exceptions.NotFoundException;
 import com.ahirajustice.customersupport.common.repositories.RoleRepository;
 import com.ahirajustice.customersupport.common.repositories.UserRepository;
-import com.ahirajustice.customersupport.user.mappings.UserMappings;
 import com.ahirajustice.customersupport.user.queries.SearchUsersQuery;
 import com.ahirajustice.customersupport.user.requests.UserCreateRequest;
 import com.ahirajustice.customersupport.user.requests.UserUpdateRequest;
 import com.ahirajustice.customersupport.user.services.UserService;
 import com.ahirajustice.customersupport.user.viewmodels.UserViewModel;
 import lombok.RequiredArgsConstructor;
-import org.mapstruct.factory.Mappers;
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,12 +26,10 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-    
-    private final UserMappings mappings = Mappers.getMapper(UserMappings.class);
 
     @Override
      public Page<UserViewModel> searchUsers(SearchUsersQuery query) {
-        return userRepository.findAll(query.getPredicate(), query.getPageable()).map(mappings::userToUserViewModel);
+        return userRepository.findAll(query.getPredicate(), query.getPageable()).map(UserViewModel::from);
     }
 
     @Override
@@ -44,7 +40,7 @@ public class UserServiceImpl implements UserService {
             throw new NotFoundException(String.format("User with id: '%d' does not exist", id));
         }
 
-        return mappings.userToUserViewModel(userExists.get());
+        return UserViewModel.from(userExists.get());
     }
 
     @Override
@@ -55,14 +51,14 @@ public class UserServiceImpl implements UserService {
             throw new BadRequestException(String.format("User with username: '%s' already exists", request.getUsername()));
         }
 
-        User user = mappings.userCreateRequestToUser(request);
+        User user = buildUser(request);
 
         String encryptedPassword = passwordEncoder.encode(request.getPassword());
         Role userRole = roleRepository.findByName(Roles.USER.name()).orElse(null);
         user.setPassword(encryptedPassword);
         user.setRole(userRole);
 
-        return mappings.userToUserViewModel(userRepository.save(user));
+        return UserViewModel.from(userRepository.save(user));
     }
 
     @Override
@@ -79,9 +75,16 @@ public class UserServiceImpl implements UserService {
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
 
-        User updatedUser = userRepository.save(user);
+        return UserViewModel.from(userRepository.save(user));
+    }
 
-        return mappings.userToUserViewModel(updatedUser);
+    private User buildUser(UserCreateRequest request) {
+        return User.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .build();
     }
 
 }
