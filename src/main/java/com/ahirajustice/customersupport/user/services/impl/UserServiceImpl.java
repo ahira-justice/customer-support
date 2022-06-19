@@ -8,8 +8,8 @@ import com.ahirajustice.customersupport.common.exceptions.NotFoundException;
 import com.ahirajustice.customersupport.common.repositories.RoleRepository;
 import com.ahirajustice.customersupport.common.repositories.UserRepository;
 import com.ahirajustice.customersupport.user.queries.SearchUsersQuery;
-import com.ahirajustice.customersupport.user.requests.UserCreateRequest;
-import com.ahirajustice.customersupport.user.requests.UserUpdateRequest;
+import com.ahirajustice.customersupport.user.requests.CreateUserRequest;
+import com.ahirajustice.customersupport.user.requests.UpdateUserRequest;
 import com.ahirajustice.customersupport.user.services.UserService;
 import com.ahirajustice.customersupport.user.viewmodels.UserViewModel;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +44,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserViewModel createUser(UserCreateRequest request) {
+    public UserViewModel createUser(CreateUserRequest request) {
+        return UserViewModel.from(createUser(request, Roles.USER));
+    }
+
+    @Override
+    public User createUser(CreateUserRequest request, Roles role) {
         Optional<User> userExists = userRepository.findByUsername(request.getUsername());
 
         if (userExists.isPresent()) {
@@ -54,15 +59,15 @@ public class UserServiceImpl implements UserService {
         User user = buildUser(request);
 
         String encryptedPassword = passwordEncoder.encode(request.getPassword());
-        Role userRole = roleRepository.findByName(Roles.USER.name()).orElse(null);
+        Role userRole = roleRepository.findByName(role.name()).orElse(null);
         user.setPassword(encryptedPassword);
         user.setRole(userRole);
 
-        return UserViewModel.from(userRepository.save(user));
+        return userRepository.save(user);
     }
 
     @Override
-    public UserViewModel updateUser(UserUpdateRequest request, long id) {
+    public UserViewModel updateUser(UpdateUserRequest request, long id) {
         Optional<User> userExists = userRepository.findById(id);
 
         if (!userExists.isPresent()) {
@@ -78,7 +83,7 @@ public class UserServiceImpl implements UserService {
         return UserViewModel.from(userRepository.save(user));
     }
 
-    private User buildUser(UserCreateRequest request) {
+    private User buildUser(CreateUserRequest request) {
         return User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())

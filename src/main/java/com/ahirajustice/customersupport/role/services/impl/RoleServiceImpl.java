@@ -12,8 +12,8 @@ import com.ahirajustice.customersupport.common.exceptions.ValidationException;
 import com.ahirajustice.customersupport.common.repositories.AuthorityRepository;
 import com.ahirajustice.customersupport.common.repositories.RoleRepository;
 import com.ahirajustice.customersupport.common.utils.CommonUtils;
-import com.ahirajustice.customersupport.role.requests.RoleCreateRequest;
-import com.ahirajustice.customersupport.role.requests.RoleUpdateRequest;
+import com.ahirajustice.customersupport.role.requests.CreateRoleRequest;
+import com.ahirajustice.customersupport.role.requests.UpdateRoleRequest;
 import com.ahirajustice.customersupport.role.services.RoleService;
 import com.ahirajustice.customersupport.role.viewmodels.RoleViewModel;
 import com.ahirajustice.customersupport.user.services.CurrentUserService;
@@ -53,7 +53,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public RoleViewModel createRole(RoleCreateRequest request) {
+    public RoleViewModel createRole(CreateRoleRequest request) {
         validate(request.getName());
         User currentUser = currentUserService.getCurrentUser();
         if (request.isSystem() && !currentUser.getRole().isSystem()){
@@ -88,7 +88,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public RoleViewModel updateRole(RoleUpdateRequest request, long id) {
+    public RoleViewModel updateRole(UpdateRoleRequest request, long id) {
         validate(request.getName());
         Optional<Role> roleExists = roleRepository.findById(id);
 

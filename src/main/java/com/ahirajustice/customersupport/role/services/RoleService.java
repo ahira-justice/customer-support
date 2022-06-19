@@ -1,8 +1,8 @@
 package com.ahirajustice.customersupport.role.services;
 
 
-import com.ahirajustice.customersupport.role.requests.RoleCreateRequest;
-import com.ahirajustice.customersupport.role.requests.RoleUpdateRequest;
+import com.ahirajustice.customersupport.role.requests.CreateRoleRequest;
+import com.ahirajustice.customersupport.role.requests.UpdateRoleRequest;
 import com.ahirajustice.customersupport.role.viewmodels.RoleViewModel;
 
 import java.util.List;
@@ -13,8 +13,8 @@ public interface RoleService {
 
     RoleViewModel getRole(long id);
 
-    RoleViewModel createRole(RoleCreateRequest request);
+    RoleViewModel createRole(CreateRoleRequest request);
 
-    RoleViewModel updateRole(RoleUpdateRequest request, long id);
+    RoleViewModel updateRole(UpdateRoleRequest request, long id);
 
 }

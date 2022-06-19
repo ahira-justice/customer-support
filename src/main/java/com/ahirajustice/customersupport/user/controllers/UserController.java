@@ -4,8 +4,8 @@ import com.ahirajustice.customersupport.common.error.ErrorResponse;
 import com.ahirajustice.customersupport.common.error.ValidationErrorResponse;
 import com.ahirajustice.customersupport.common.constants.AuthorityConstants;
 import com.ahirajustice.customersupport.user.queries.SearchUsersQuery;
-import com.ahirajustice.customersupport.user.requests.UserCreateRequest;
-import com.ahirajustice.customersupport.user.requests.UserUpdateRequest;
+import com.ahirajustice.customersupport.user.requests.CreateUserRequest;
+import com.ahirajustice.customersupport.user.requests.UpdateUserRequest;
 import com.ahirajustice.customersupport.user.services.UserService;
 import com.ahirajustice.customersupport.user.viewmodels.UserViewModel;
 import io.swagger.v3.oas.annotations.Operation;
@@ -81,7 +81,7 @@ public class UserController {
     )
     @RequestMapping(path = "", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public UserViewModel createUser(@Valid @RequestBody UserCreateRequest request) {
+    public UserViewModel createUser(@Valid @RequestBody CreateUserRequest request) {
         return userService.createUser(request);
     }
 
@@ -99,7 +99,7 @@ public class UserController {
     @PreAuthorize(AUTH_PREFIX + AuthorityConstants.CAN_UPDATE_USER + AUTH_SUFFIX)
     @RequestMapping(path = "/{id}", method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.OK)
-    public UserViewModel updateUser(@PathVariable long id, @Valid @RequestBody UserUpdateRequest request) {
+    public UserViewModel updateUser(@PathVariable long id, @Valid @RequestBody UpdateUserRequest request) {
         return userService.updateUser(request, id);
     }
 

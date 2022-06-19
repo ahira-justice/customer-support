@@ -3,8 +3,8 @@ package com.ahirajustice.customersupport.role.controllers;
 import com.ahirajustice.customersupport.common.error.ErrorResponse;
 import com.ahirajustice.customersupport.common.error.ValidationErrorResponse;
 import com.ahirajustice.customersupport.common.constants.AuthorityConstants;
-import com.ahirajustice.customersupport.role.requests.RoleCreateRequest;
-import com.ahirajustice.customersupport.role.requests.RoleUpdateRequest;
+import com.ahirajustice.customersupport.role.requests.CreateRoleRequest;
+import com.ahirajustice.customersupport.role.requests.UpdateRoleRequest;
 import com.ahirajustice.customersupport.role.services.RoleService;
 import com.ahirajustice.customersupport.role.viewmodels.RoleViewModel;
 import io.swagger.v3.oas.annotations.Operation;
@@ -83,7 +83,7 @@ public class RoleController {
     @PreAuthorize(AUTH_PREFIX + AuthorityConstants.CAN_CREATE_ROLE + AUTH_SUFFIX)
     @RequestMapping(path = "", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public RoleViewModel createRole(@Valid @RequestBody RoleCreateRequest request) {
+    public RoleViewModel createRole(@Valid @RequestBody CreateRoleRequest request) {
         return roleService.createRole(request);
     }
 
@@ -101,7 +101,7 @@ public class RoleController {
     @PreAuthorize(AUTH_PREFIX + AuthorityConstants.CAN_UPDATE_ROLE + AUTH_SUFFIX)
     @RequestMapping(path = "/{id}", method = RequestMethod.PUT)
     @ResponseStatus(HttpStatus.OK)
-    public RoleViewModel updateRole(@PathVariable long id, @Valid @RequestBody RoleUpdateRequest request) {
+    public RoleViewModel updateRole(@PathVariable long id, @Valid @RequestBody UpdateRoleRequest request) {
         return roleService.updateRole(request, id);
     }
 
