@@ -28,6 +28,7 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
@@ -59,6 +60,8 @@ public class AuthServiceImpl implements AuthService {
             Claims claims = Jwts.parserBuilder().setSigningKey(publicKey).build().parseClaimsJws(token).getBody();
             authToken.setUsername(claims.getSubject());
             authToken.setExpiry(claims.getExpiration());
+            authToken.setRoles(claims.get("roles", ArrayList.class));
+            authToken.setAuthorities(claims.get("authorities", ArrayList.class));
         }
         catch(ExpiredJwtException ex){
             return authToken;

@@ -9,6 +9,10 @@ import com.ahirajustice.customersupport.common.exceptions.UnauthorizedException;
 import com.ahirajustice.customersupport.common.repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
@@ -20,6 +24,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.Instant;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class AuthorizationFilter extends GenericFilterBean {
 
@@ -59,9 +65,52 @@ public class AuthorizationFilter extends GenericFilterBean {
                 writeErrorToResponse("Invalid or expired token", response);
                 return;
             }
+
+            Authentication authentication = getAuthentication(authToken);
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
         chain.doFilter(request, response);
+    }
+
+    private Authentication getAuthentication(AuthToken authToken) {
+        return new Authentication() {
+            @Override
+            public Collection<? extends GrantedAuthority> getAuthorities() {
+                return authToken.getAuthorities().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+            }
+
+            @Override
+            public Object getCredentials() {
+                return null;
+            }
+
+            @Override
+            public Object getDetails() {
+                return null;
+            }
+
+            @Override
+            public Object getPrincipal() {
+                return null;
+            }
+
+            @Override
+            public boolean isAuthenticated() {
+                return true;
+            }
+
+            @Override
+            public void setAuthenticated(boolean b) throws IllegalArgumentException {
+
+            }
+
+            @Override
+            public String getName() {
+                return authToken.getUsername();
+            }
+        };
     }
 
     private boolean excludeFromAuth(String requestURI, String requestMethod) {
