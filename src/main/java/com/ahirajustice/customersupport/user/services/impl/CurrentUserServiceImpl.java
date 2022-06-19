@@ -1,12 +1,12 @@
 package com.ahirajustice.customersupport.user.services.impl;
 
+import com.ahirajustice.customersupport.auth.services.AuthService;
 import com.ahirajustice.customersupport.common.constants.SecurityConstants;
 import com.ahirajustice.customersupport.common.entities.User;
+import com.ahirajustice.customersupport.common.exceptions.SystemErrorException;
 import com.ahirajustice.customersupport.common.exceptions.ValidationException;
-import com.ahirajustice.customersupport.common.properties.AppProperties;
 import com.ahirajustice.customersupport.common.repositories.UserRepository;
 import com.ahirajustice.customersupport.user.services.CurrentUserService;
-import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -20,9 +20,9 @@ import java.util.Optional;
 @Slf4j
 public class CurrentUserServiceImpl implements CurrentUserService {
 
-    private final AppProperties appProperties;
     private final HttpServletRequest request;
     private final UserRepository userRepository;
+    private final AuthService authService;
 
     @Override
     public User getCurrentUser() {
@@ -41,19 +41,22 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
             return userExists.get();
         }
+        catch(ValidationException ex) {
+            throw ex;
+        }
         catch (Exception ex) {
             log.debug(ex.getMessage(), ex);
-            throw new ValidationException("Error getting HttpServletRequest");
+            throw new SystemErrorException("Error occurred while getting logged in user");
         }
     }
 
     private Optional<String> getUsernameFromToken(String header) {
-        if (StringUtils.isNotBlank(header)) {
+        if (StringUtils.isBlank(header)) {
             return Optional.empty();
         }
 
         String token = header.split(" ")[1];
-        String username = Jwts.parser().setSigningKey(appProperties.getSecretKey()).parseClaimsJws(token).getBody().getSubject();
+        String username = authService.decodeJwt(token).getUsername();
 
         return Optional.ofNullable(username);
     }
