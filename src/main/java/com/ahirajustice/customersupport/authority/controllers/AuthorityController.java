@@ -30,7 +30,7 @@ import static com.ahirajustice.customersupport.common.constants.AuthorityConstan
 @RestController
 @RequestMapping("api/authorities")
 @RequiredArgsConstructor
-public class AuthoritiesController {
+public class AuthorityController {
 
     private final AuthorityService authorityService;
 
@@ -38,6 +38,7 @@ public class AuthoritiesController {
     @ApiResponses(
         value = {
             @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = AuthorityViewModel.class))) }),
+            @ApiResponse(responseCode = "401", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
             @ApiResponse(responseCode = "403", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
         }
     )
@@ -52,6 +53,7 @@ public class AuthoritiesController {
     @ApiResponses(
         value = {
             @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = AuthorityViewModel.class)) }),
+            @ApiResponse(responseCode = "401", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
             @ApiResponse(responseCode = "403", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
             @ApiResponse(responseCode = "404", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) })
         }
