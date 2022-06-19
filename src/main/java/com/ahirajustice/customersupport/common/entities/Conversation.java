@@ -13,6 +13,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -33,5 +34,7 @@ public class Conversation extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ConversationStatus status;
+
+    private LocalDateTime closedOn;
 
 }

@@ -22,6 +22,12 @@ public class AuthoritiesProvider {
     public static Authority CAN_VIEW_CONVERSATION = new Authority(AuthorityConstants.CAN_VIEW_CONVERSATION);
     public static Authority CAN_SEARCH_CONVERSATIONS = new Authority(AuthorityConstants.CAN_SEARCH_CONVERSATIONS);
     public static Authority CAN_INITIATE_CONVERSATION = new Authority(AuthorityConstants.CAN_INITIATE_CONVERSATION);
+    public static Authority CAN_CLOSE_CONVERSATION = new Authority(AuthorityConstants.CAN_CLOSE_CONVERSATION);
+
+    // Message authorities
+    public static Authority CAN_VIEW_MESSAGE = new Authority(AuthorityConstants.CAN_VIEW_MESSAGE);
+    public static Authority CAN_SEARCH_MESSAGES = new Authority(AuthorityConstants.CAN_SEARCH_MESSAGES);
+    public static Authority CAN_SEND_MESSAGE = new Authority(AuthorityConstants.CAN_SEND_MESSAGE);
 
     // Authority authorities
     public static Authority CAN_VIEW_AUTHORITY = new Authority(AuthorityConstants.CAN_VIEW_AUTHORITY, true);
@@ -47,6 +53,12 @@ public class AuthoritiesProvider {
         authorities.add(CAN_VIEW_CONVERSATION);
         authorities.add(CAN_SEARCH_CONVERSATIONS);
         authorities.add(CAN_INITIATE_CONVERSATION);
+        authorities.add(CAN_CLOSE_CONVERSATION);
+
+        // Message authorities
+        authorities.add(CAN_VIEW_MESSAGE);
+        authorities.add(CAN_SEARCH_MESSAGES);
+        authorities.add(CAN_SEND_MESSAGE);
 
         // Authority authorities
         authorities.add(CAN_VIEW_AUTHORITY);
@@ -73,6 +85,11 @@ public class AuthoritiesProvider {
         authorities.add(CAN_SEARCH_CONVERSATIONS);
         authorities.add(CAN_INITIATE_CONVERSATION);
 
+        // Message authorities
+        authorities.add(CAN_VIEW_MESSAGE);
+        authorities.add(CAN_SEARCH_MESSAGES);
+        authorities.add(CAN_SEND_MESSAGE);
+
         return authorities;
     }
 
@@ -86,6 +103,12 @@ public class AuthoritiesProvider {
         // Conversation authorities
         authorities.add(CAN_VIEW_CONVERSATION);
         authorities.add(CAN_SEARCH_CONVERSATIONS);
+        authorities.add(CAN_CLOSE_CONVERSATION);
+
+        // Message authorities
+        authorities.add(CAN_VIEW_MESSAGE);
+        authorities.add(CAN_SEARCH_MESSAGES);
+        authorities.add(CAN_SEND_MESSAGE);
 
         return authorities;
     }

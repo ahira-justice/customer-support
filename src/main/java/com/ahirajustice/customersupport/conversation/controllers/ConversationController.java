@@ -3,6 +3,7 @@ package com.ahirajustice.customersupport.conversation.controllers;
 import com.ahirajustice.customersupport.common.constants.AuthorityConstants;
 import com.ahirajustice.customersupport.common.error.ErrorResponse;
 import com.ahirajustice.customersupport.common.error.ValidationErrorResponse;
+import com.ahirajustice.customersupport.conversation.requests.CloseConversationRequest;
 import com.ahirajustice.customersupport.conversation.requests.InitiateConversationRequest;
 import com.ahirajustice.customersupport.conversation.services.ConversationService;
 import com.ahirajustice.customersupport.conversation.viewmodels.ConversationViewModel;
@@ -44,11 +45,27 @@ public class ConversationController {
             @ApiResponse(responseCode = "422", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class)) })
         }
     )
-    @PreAuthorize(AUTH_PREFIX + AuthorityConstants.CAN_INITIATE_CONVERSATION + AUTH_SUFFIX)
+    @PreAuthorize(AUTH_PREFIX + AuthorityConstants.CAN_CLOSE_CONVERSATION + AUTH_SUFFIX)
     @RequestMapping(path = "", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
     public ConversationViewModel initiateConversation(@Valid @RequestBody InitiateConversationRequest request) {
         return conversationService.initiateConversation(request);
+    }
+
+    @Operation(summary = "Close Conversation", security = { @SecurityRequirement(name = "bearer") })
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ConversationViewModel.class)) }),
+                    @ApiResponse(responseCode = "401", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
+                    @ApiResponse(responseCode = "403", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
+                    @ApiResponse(responseCode = "422", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class)) })
+            }
+    )
+    @PreAuthorize(AUTH_PREFIX + AuthorityConstants.CAN_INITIATE_CONVERSATION + AUTH_SUFFIX)
+    @RequestMapping(path = "", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
+    public ConversationViewModel closeConversation(@Valid @RequestBody CloseConversationRequest request) {
+        return conversationService.closeConversation(request);
     }
 
 }

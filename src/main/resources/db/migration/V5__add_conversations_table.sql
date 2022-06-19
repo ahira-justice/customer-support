@@ -10,6 +10,7 @@ CREATE TABLE conversations
     agent_id BIGINT,
     user_id BIGINT NOT NULL,
     status VARCHAR(255) NOT NULL,
+    closed_on datetime,
     CONSTRAINT pk_conversations PRIMARY KEY (id),
     CONSTRAINT FK_CONVERSATIONS_ON_AGENT FOREIGN KEY (agent_id) REFERENCES agents (id),
     CONSTRAINT FK_CONVERSATIONS_ON_USER FOREIGN KEY (user_id) REFERENCES users (id)

@@ -2,6 +2,7 @@ package com.ahirajustice.customersupport.conversation.viewmodels;
 
 import com.ahirajustice.customersupport.agent.viewmodels.AgentViewModel;
 import com.ahirajustice.customersupport.common.entities.Conversation;
+import com.ahirajustice.customersupport.common.enums.ConversationStatus;
 import com.ahirajustice.customersupport.common.viewmodels.BaseViewModel;
 import com.ahirajustice.customersupport.user.viewmodels.UserViewModel;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.BeanUtils;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -20,6 +23,8 @@ public class ConversationViewModel extends BaseViewModel {
 
     private AgentViewModel agent;
     private UserViewModel user;
+    private ConversationStatus status;
+    private LocalDateTime closedOn;
 
     public static ConversationViewModel from(Conversation conversation) {
         ConversationViewModel response = new ConversationViewModel();
