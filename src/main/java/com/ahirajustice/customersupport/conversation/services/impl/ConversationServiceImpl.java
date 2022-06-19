@@ -24,18 +24,18 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     @Transactional
     public ConversationViewModel initiateConversation(InitiateConversationRequest request) {
-        User loggedInCustomer = currentUserService.getCurrentUser();
+        User loggedInUser = currentUserService.getCurrentUser();
 
-        Conversation conversation = buildConversation(loggedInCustomer);
+        Conversation conversation = buildConversation(loggedInUser);
         conversationRepository.save(conversation);
-        messageService.createMessage(conversation, loggedInCustomer, request.getMessageBody());
+        messageService.createMessage(conversation, loggedInUser, request.getMessageBody());
 
         return ConversationViewModel.from(conversation);
     }
 
-    private Conversation buildConversation(User customer) {
+    private Conversation buildConversation(User user) {
         return Conversation.builder()
-                .customer(customer)
+                .user(user)
                 .build();
     }
 

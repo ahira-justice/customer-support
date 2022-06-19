@@ -1,5 +1,6 @@
 package com.ahirajustice.customersupport.conversation.viewmodels;
 
+import com.ahirajustice.customersupport.agent.viewmodels.AgentViewModel;
 import com.ahirajustice.customersupport.common.entities.Conversation;
 import com.ahirajustice.customersupport.common.viewmodels.BaseViewModel;
 import com.ahirajustice.customersupport.user.viewmodels.UserViewModel;
@@ -17,8 +18,8 @@ import org.springframework.beans.BeanUtils;
 @AllArgsConstructor
 public class ConversationViewModel extends BaseViewModel {
 
-    private UserViewModel agent;
-    private UserViewModel customer;
+    private AgentViewModel agent;
+    private UserViewModel user;
 
     public static ConversationViewModel from(Conversation conversation) {
         ConversationViewModel response = new ConversationViewModel();
@@ -26,9 +27,9 @@ public class ConversationViewModel extends BaseViewModel {
         BeanUtils.copyProperties(conversation, response);
 
         if (conversation.getAgent() != null)
-            response.setAgent(UserViewModel.from(conversation.getAgent()));
+            response.setAgent(AgentViewModel.from(conversation.getAgent()));
 
-        response.setCustomer(UserViewModel.from(conversation.getCustomer()));
+        response.setUser(UserViewModel.from(conversation.getUser()));
 
         return response;
     }

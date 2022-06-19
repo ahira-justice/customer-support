@@ -8,8 +8,8 @@ CREATE TABLE conversations
     is_deleted BIT(1) NOT NULL,
     version INT NOT NULL,
     agent_id BIGINT,
-    customer_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
     CONSTRAINT pk_conversations PRIMARY KEY (id),
-    CONSTRAINT FK_CONVERSATIONS_ON_AGENT FOREIGN KEY (agent_id) REFERENCES users (id),
-    CONSTRAINT FK_CONVERSATIONS_ON_CUSTOMER FOREIGN KEY (customer_id) REFERENCES users (id)
+    CONSTRAINT FK_CONVERSATIONS_ON_AGENT FOREIGN KEY (agent_id) REFERENCES agents (id),
+    CONSTRAINT FK_CONVERSATIONS_ON_USER FOREIGN KEY (user_id) REFERENCES users (id)
 );
