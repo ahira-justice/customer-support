@@ -14,10 +14,14 @@ public class AuthoritiesProvider {
     // User authorities
     public static Authority CAN_VIEW_USER = new Authority(AuthorityConstants.CAN_VIEW_USER);
     public static Authority CAN_SEARCH_USERS = new Authority(AuthorityConstants.CAN_SEARCH_USERS, true);
-    public static Authority CAN_CREATE_USER = new Authority(AuthorityConstants.CAN_CREATE_USER);
     public static Authority CAN_CREATE_AGENT = new Authority(AuthorityConstants.CAN_CREATE_AGENT, true);
     public static Authority CAN_CREATE_SUPER_ADMIN = new Authority(AuthorityConstants.CAN_CREATE_SUPER_ADMIN, true);
     public static Authority CAN_UPDATE_USER = new Authority(AuthorityConstants.CAN_UPDATE_USER);
+
+    // Conversation authorities
+    public static Authority CAN_VIEW_CONVERSATION = new Authority(AuthorityConstants.CAN_VIEW_CONVERSATION);
+    public static Authority CAN_SEARCH_CONVERSATIONS = new Authority(AuthorityConstants.CAN_SEARCH_CONVERSATIONS);
+    public static Authority CAN_INITIATE_CONVERSATION = new Authority(AuthorityConstants.CAN_INITIATE_CONVERSATION);
 
     // Authority authorities
     public static Authority CAN_VIEW_AUTHORITY = new Authority(AuthorityConstants.CAN_VIEW_AUTHORITY, true);
@@ -35,10 +39,14 @@ public class AuthoritiesProvider {
         // User authorities
         authorities.add(CAN_VIEW_USER);
         authorities.add(CAN_SEARCH_USERS);
-        authorities.add(CAN_CREATE_USER);
         authorities.add(CAN_CREATE_AGENT);
         authorities.add(CAN_CREATE_SUPER_ADMIN);
         authorities.add(CAN_UPDATE_USER);
+
+        // Conversation authorities
+        authorities.add(CAN_VIEW_CONVERSATION);
+        authorities.add(CAN_SEARCH_CONVERSATIONS);
+        authorities.add(CAN_INITIATE_CONVERSATION);
 
         // Authority authorities
         authorities.add(CAN_VIEW_AUTHORITY);
@@ -51,6 +59,39 @@ public class AuthoritiesProvider {
         authorities.add(CAN_UPDATE_ROLE);
 
         return authorities;
+    }
+
+    private static Set<Authority> getUserAuthorities() {
+        Set<Authority> authorities = new HashSet<>();
+
+        // User authorities
+        authorities.add(CAN_VIEW_USER);
+        authorities.add(CAN_UPDATE_USER);
+
+        // Conversation authorities
+        authorities.add(CAN_VIEW_CONVERSATION);
+        authorities.add(CAN_SEARCH_CONVERSATIONS);
+        authorities.add(CAN_INITIATE_CONVERSATION);
+
+        return authorities;
+    }
+
+    private static Set<Authority> getAgentAuthorities() {
+        Set<Authority> authorities = new HashSet<>();
+
+        // User authorities
+        authorities.add(CAN_VIEW_USER);
+        authorities.add(CAN_UPDATE_USER);
+
+        // Conversation authorities
+        authorities.add(CAN_VIEW_CONVERSATION);
+        authorities.add(CAN_SEARCH_CONVERSATIONS);
+
+        return authorities;
+    }
+
+    private static Set<Authority> getSuperAdminAuthorities() {
+        return getAllAuthorities();
     }
 
     public static Set<Role> getDefaultRoles() {
@@ -69,25 +110,6 @@ public class AuthoritiesProvider {
         roles.add(superAdmin);
 
         return roles;
-    }
-
-    private static Set<Authority> getUserAuthorities() {
-        Set<Authority> authorities = new HashSet<>();
-
-        // User authorities
-        authorities.add(CAN_VIEW_USER);
-        authorities.add(CAN_CREATE_USER);
-        authorities.add(CAN_UPDATE_USER);
-
-        return authorities;
-    }
-
-    private static Set<Authority> getAgentAuthorities() {
-        return getUserAuthorities();
-    }
-
-    private static Set<Authority> getSuperAdminAuthorities() {
-        return getAllAuthorities();
     }
 
 }
