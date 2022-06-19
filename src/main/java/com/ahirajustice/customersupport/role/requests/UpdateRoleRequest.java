@@ -16,7 +16,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoleUpdateRequest {
+public class UpdateRoleRequest {
 
     @NotBlank(message = "name is required")
     private String name;
