@@ -31,4 +31,9 @@ public class AgentServiceImpl implements AgentService {
         return AgentViewModel.from(agentRepository.save(agent));
     }
 
+    @Override
+    public Agent getAgent(User user) {
+        return agentRepository.findByUser(user).orElse(null);
+    }
+
 }
