@@ -1,6 +1,5 @@
 package com.ahirajustice.customersupport.conversation.services.impl;
 
-import com.ahirajustice.customersupport.common.entities.Agent;
 import com.ahirajustice.customersupport.common.entities.Conversation;
 import com.ahirajustice.customersupport.common.entities.User;
 import com.ahirajustice.customersupport.common.enums.ConversationStatus;
@@ -58,14 +57,6 @@ public class ConversationServiceImpl implements ConversationService {
     public Conversation getConversation(long conversationId) {
         return conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new NotFoundException(String.format("Conversation with id: '%s' not found", conversationId)));
-    }
-
-    @Override
-    public void assignAgentToConversation(Conversation conversation, Agent agent) {
-        conversation.setAgent(agent);
-        conversation.setStatus(ConversationStatus.ACTIVE);
-
-        conversationRepository.save(conversation);
     }
 
     private Conversation buildConversation(User user) {

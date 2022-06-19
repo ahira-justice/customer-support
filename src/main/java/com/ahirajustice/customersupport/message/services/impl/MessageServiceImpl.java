@@ -7,8 +7,9 @@ import com.ahirajustice.customersupport.common.entities.Message;
 import com.ahirajustice.customersupport.common.entities.User;
 import com.ahirajustice.customersupport.common.enums.ConversationStatus;
 import com.ahirajustice.customersupport.common.exceptions.BadRequestException;
+import com.ahirajustice.customersupport.common.exceptions.NotFoundException;
+import com.ahirajustice.customersupport.common.repositories.ConversationRepository;
 import com.ahirajustice.customersupport.common.repositories.MessageRepository;
-import com.ahirajustice.customersupport.conversation.services.ConversationService;
 import com.ahirajustice.customersupport.message.requests.SendMessageRequest;
 import com.ahirajustice.customersupport.message.services.MessageService;
 import com.ahirajustice.customersupport.message.viewmodels.MessageViewModel;
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Service;
 public class MessageServiceImpl implements MessageService {
 
     private final MessageRepository messageRepository;
-    private final ConversationService conversationService;
+    private final ConversationRepository conversationRepository;
     private final CurrentUserService currentUserService;
     private final AgentService agentService;
 
@@ -38,7 +39,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public MessageViewModel sendMessage(SendMessageRequest request) {
-        Conversation conversation = conversationService.getConversation(request.getConversationId());
+        Conversation conversation = getConversation(request.getConversationId());
         User loggedInUser = currentUserService.getCurrentUser();
 
         verifyLoggedInUserIsPartOfConversation(conversation, loggedInUser);
@@ -47,7 +48,7 @@ public class MessageServiceImpl implements MessageService {
             Agent agent = agentService.getAgent(loggedInUser);
 
             if (agent != null) {
-                conversationService.assignAgentToConversation(conversation, agent);
+                assignAgentToConversation(conversation, agent);
             }
         }
 
@@ -63,6 +64,18 @@ public class MessageServiceImpl implements MessageService {
         ) {
             throw new BadRequestException("User is not part of this conversation");
         }
+    }
+
+    private Conversation getConversation(long conversationId) {
+        return conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new NotFoundException(String.format("Conversation with id: '%s' not found", conversationId)));
+    }
+
+    private void assignAgentToConversation(Conversation conversation, Agent agent) {
+        conversation.setAgent(agent);
+        conversation.setStatus(ConversationStatus.ACTIVE);
+
+        conversationRepository.save(conversation);
     }
 
 }

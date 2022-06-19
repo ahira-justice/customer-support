@@ -62,7 +62,7 @@ public class ConversationController {
             }
     )
     @PreAuthorize(AUTH_PREFIX + AuthorityConstants.CAN_INITIATE_CONVERSATION + AUTH_SUFFIX)
-    @RequestMapping(path = "", method = RequestMethod.POST)
+    @RequestMapping(path = "/close", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
     public ConversationViewModel closeConversation(@Valid @RequestBody CloseConversationRequest request) {
         return conversationService.closeConversation(request);
