@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @Tag(name = "Auth")
 @RestController
 @RequestMapping("api/auth")
@@ -37,7 +39,7 @@ public class AuthController {
     )
     @RequestMapping(path = "/login", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
-    public LoginResponse externalLogin(@RequestBody LoginRequest request) {
+    public LoginResponse externalLogin(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
     }
 
