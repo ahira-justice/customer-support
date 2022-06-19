@@ -8,10 +8,14 @@ public class AuthorityConstants {
     // User authorities
     public static final String CAN_VIEW_USER = "CAN_VIEW_USER";
     public static final String CAN_SEARCH_USERS = "CAN_SEARCH_USERS";
-    public static final String CAN_CREATE_USER = "CAN_CREATE_USER";
     public static final String CAN_CREATE_AGENT = "CAN_CREATE_AGENT";
     public static final String CAN_CREATE_SUPER_ADMIN = "CAN_CREATE_SUPER_ADMIN";
     public static final String CAN_UPDATE_USER = "CAN_UPDATE_USER";
+
+    //Conversation authorities
+    public static final String CAN_VIEW_CONVERSATION = "CAN_VIEW_CONVERSATION";
+    public static final String CAN_SEARCH_CONVERSATIONS = "CAN_SEARCH_CONVERSATIONS";
+    public static final String CAN_INITIATE_CONVERSATION = "CAN_INITIATE_CONVERSATION";
 
     // Authority authorities
     public static final String CAN_VIEW_AUTHORITY = "CAN_VIEW_AUTHORITY";
