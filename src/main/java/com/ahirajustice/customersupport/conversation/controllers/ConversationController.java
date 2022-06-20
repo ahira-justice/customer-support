@@ -3,6 +3,7 @@ package com.ahirajustice.customersupport.conversation.controllers;
 import com.ahirajustice.customersupport.common.constants.AuthorityConstants;
 import com.ahirajustice.customersupport.common.error.ErrorResponse;
 import com.ahirajustice.customersupport.common.error.ValidationErrorResponse;
+import com.ahirajustice.customersupport.conversation.queries.SearchConversationsQuery;
 import com.ahirajustice.customersupport.conversation.requests.CloseConversationRequest;
 import com.ahirajustice.customersupport.conversation.requests.InitiateConversationRequest;
 import com.ahirajustice.customersupport.conversation.services.ConversationService;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,6 +52,21 @@ public class ConversationController {
     @ResponseStatus(HttpStatus.OK)
     public ConversationViewModel initiateConversation(@Valid @RequestBody InitiateConversationRequest request) {
         return conversationService.initiateConversation(request);
+    }
+
+    @Operation(summary = "Search Conversations", security = { @SecurityRequirement(name = "bearer") })
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ConversationViewModel.class)) }),
+                    @ApiResponse(responseCode = "401", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
+                    @ApiResponse(responseCode = "403", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
+            }
+    )
+    @PreAuthorize(AUTH_PREFIX + AuthorityConstants.CAN_SEARCH_CONVERSATIONS + AUTH_SUFFIX)
+    @RequestMapping(path = "", method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    public Page<ConversationViewModel> searchConversations(@Valid @RequestBody SearchConversationsQuery query) {
+        return conversationService.searchConversations(query);
     }
 
     @Operation(summary = "Close Conversation", security = { @SecurityRequirement(name = "bearer") })
