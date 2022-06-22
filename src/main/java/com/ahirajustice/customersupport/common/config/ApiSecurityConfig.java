@@ -1,4 +1,4 @@
-package com.ahirajustice.customersupport.common.security;
+package com.ahirajustice.customersupport.common.config;
 
 import com.ahirajustice.customersupport.common.filters.AuthorizationFilter;
 import org.springframework.context.annotation.Bean;

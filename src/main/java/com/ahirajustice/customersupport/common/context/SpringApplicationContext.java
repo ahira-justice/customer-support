@@ -1,4 +1,4 @@
-package com.ahirajustice.customersupport.common.config;
+package com.ahirajustice.customersupport.common.context;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
