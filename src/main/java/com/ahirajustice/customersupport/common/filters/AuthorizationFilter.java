@@ -2,8 +2,8 @@ package com.ahirajustice.customersupport.common.filters;
 
 import com.ahirajustice.customersupport.auth.dtos.AuthToken;
 import com.ahirajustice.customersupport.auth.services.AuthService;
-import com.ahirajustice.customersupport.common.config.SpringApplicationContext;
 import com.ahirajustice.customersupport.common.constants.SecurityConstants;
+import com.ahirajustice.customersupport.common.context.SpringApplicationContext;
 import com.ahirajustice.customersupport.common.error.ErrorResponse;
 import com.ahirajustice.customersupport.common.exceptions.UnauthorizedException;
 import com.ahirajustice.customersupport.common.repositories.UserRepository;
@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
@@ -27,6 +28,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+@Component
 public class AuthorizationFilter extends GenericFilterBean {
 
     @Override
