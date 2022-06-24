@@ -8,6 +8,7 @@ import com.ahirajustice.customersupport.common.exceptions.NotFoundException;
 import com.ahirajustice.customersupport.common.exceptions.ValidationException;
 import com.ahirajustice.customersupport.common.repositories.ConversationRepository;
 import com.ahirajustice.customersupport.conversation.queries.SearchConversationsQuery;
+import com.ahirajustice.customersupport.conversation.queries.SearchInitiatedConversationsQuery;
 import com.ahirajustice.customersupport.conversation.requests.CloseConversationRequest;
 import com.ahirajustice.customersupport.conversation.requests.InitiateConversationRequest;
 import com.ahirajustice.customersupport.conversation.services.ConversationService;
@@ -35,11 +36,19 @@ public class ConversationServiceImpl implements ConversationService {
     public ConversationViewModel initiateConversation(InitiateConversationRequest request) {
         User loggedInUser = currentUserService.getCurrentUser();
 
-        Conversation conversation = buildConversation(loggedInUser);
-        conversationRepository.save(conversation);
+        Conversation conversation = createConversation(loggedInUser);
         messageService.createMessage(conversation, loggedInUser, request.getMessageBody());
 
         return ConversationViewModel.from(conversation);
+    }
+
+    private Conversation createConversation(User user) {
+        Conversation conversation = Conversation.builder()
+                .user(user)
+                .status(ConversationStatus.INITIATED)
+                .build();
+
+        return conversationRepository.save(conversation);
     }
 
     @Override
@@ -51,8 +60,13 @@ public class ConversationServiceImpl implements ConversationService {
                 QConversation.conversation.agent.user.id.eq(loggedInUser.getId())
                         .or(QConversation.conversation.user.id.eq(loggedInUser.getId()))
         );
-        
+
         return conversationRepository.findAll(expression, query.getPageable()).map(ConversationViewModel::from);
+    }
+
+    @Override
+    public Page<ConversationViewModel> searchInitiatedConversations(SearchInitiatedConversationsQuery query) {
+        return conversationRepository.findAll( query.getPredicate(), query.getPageable()).map(ConversationViewModel::from);
     }
 
     @Override
@@ -70,24 +84,17 @@ public class ConversationServiceImpl implements ConversationService {
         return ConversationViewModel.from(closeConversation(conversation));
     }
 
-    @Override
-    public Conversation getConversation(long conversationId) {
-        return conversationRepository.findById(conversationId)
-                .orElseThrow(() -> new NotFoundException(String.format("Conversation with id: '%s' not found", conversationId)));
-    }
-
-    private Conversation buildConversation(User user) {
-        return Conversation.builder()
-                .user(user)
-                .status(ConversationStatus.INITIATED)
-                .build();
-    }
-
     private Conversation closeConversation(Conversation conversation) {
         conversation.setStatus(ConversationStatus.CLOSED);
         conversation.setClosedOn(LocalDateTime.now());
 
         return conversationRepository.save(conversation);
+    }
+
+    @Override
+    public Conversation getConversation(long conversationId) {
+        return conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new NotFoundException(String.format("Conversation with id: '%s' not found", conversationId)));
     }
 
 }

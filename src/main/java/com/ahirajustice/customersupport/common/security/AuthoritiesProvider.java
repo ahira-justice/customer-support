@@ -21,6 +21,7 @@ public class AuthoritiesProvider {
     // Conversation authorities
     public static Authority CAN_VIEW_CONVERSATION = new Authority(AuthorityConstants.CAN_VIEW_CONVERSATION);
     public static Authority CAN_SEARCH_CONVERSATIONS = new Authority(AuthorityConstants.CAN_SEARCH_CONVERSATIONS);
+    public static Authority CAN_SEARCH_INITIATED_CONVERSATIONS = new Authority(AuthorityConstants.CAN_SEARCH_INITIATED_CONVERSATIONS);
     public static Authority CAN_INITIATE_CONVERSATION = new Authority(AuthorityConstants.CAN_INITIATE_CONVERSATION);
     public static Authority CAN_CLOSE_CONVERSATION = new Authority(AuthorityConstants.CAN_CLOSE_CONVERSATION);
 
@@ -52,6 +53,7 @@ public class AuthoritiesProvider {
         // Conversation authorities
         authorities.add(CAN_VIEW_CONVERSATION);
         authorities.add(CAN_SEARCH_CONVERSATIONS);
+        authorities.add(CAN_SEARCH_INITIATED_CONVERSATIONS);
         authorities.add(CAN_INITIATE_CONVERSATION);
         authorities.add(CAN_CLOSE_CONVERSATION);
 
@@ -103,6 +105,7 @@ public class AuthoritiesProvider {
         // Conversation authorities
         authorities.add(CAN_VIEW_CONVERSATION);
         authorities.add(CAN_SEARCH_CONVERSATIONS);
+        authorities.add(CAN_SEARCH_INITIATED_CONVERSATIONS);
         authorities.add(CAN_CLOSE_CONVERSATION);
 
         // Message authorities

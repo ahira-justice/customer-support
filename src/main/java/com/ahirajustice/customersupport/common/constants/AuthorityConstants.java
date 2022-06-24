@@ -15,6 +15,7 @@ public class AuthorityConstants {
     //Conversation authorities
     public static final String CAN_VIEW_CONVERSATION = "CAN_VIEW_CONVERSATION";
     public static final String CAN_SEARCH_CONVERSATIONS = "CAN_SEARCH_CONVERSATIONS";
+    public static final String CAN_SEARCH_INITIATED_CONVERSATIONS = "CAN_SEARCH_INITIATED_CONVERSATIONS";
     public static final String CAN_INITIATE_CONVERSATION = "CAN_INITIATE_CONVERSATION";
     public static final String CAN_CLOSE_CONVERSATION = "CAN_CLOSE_CONVERSATION";
 

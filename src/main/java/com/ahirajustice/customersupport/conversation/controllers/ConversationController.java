@@ -4,6 +4,7 @@ import com.ahirajustice.customersupport.common.constants.AuthorityConstants;
 import com.ahirajustice.customersupport.common.error.ErrorResponse;
 import com.ahirajustice.customersupport.common.error.ValidationErrorResponse;
 import com.ahirajustice.customersupport.conversation.queries.SearchConversationsQuery;
+import com.ahirajustice.customersupport.conversation.queries.SearchInitiatedConversationsQuery;
 import com.ahirajustice.customersupport.conversation.requests.CloseConversationRequest;
 import com.ahirajustice.customersupport.conversation.requests.InitiateConversationRequest;
 import com.ahirajustice.customersupport.conversation.services.ConversationService;
@@ -47,7 +48,7 @@ public class ConversationController {
             @ApiResponse(responseCode = "422", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class)) })
         }
     )
-    @PreAuthorize(AUTH_PREFIX + AuthorityConstants.CAN_CLOSE_CONVERSATION + AUTH_SUFFIX)
+    @PreAuthorize(AUTH_PREFIX + AuthorityConstants.CAN_INITIATE_CONVERSATION + AUTH_SUFFIX)
     @RequestMapping(path = "", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
     public ConversationViewModel initiateConversation(@Valid @RequestBody InitiateConversationRequest request) {
@@ -65,8 +66,23 @@ public class ConversationController {
     @PreAuthorize(AUTH_PREFIX + AuthorityConstants.CAN_SEARCH_CONVERSATIONS + AUTH_SUFFIX)
     @RequestMapping(path = "", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
-    public Page<ConversationViewModel> searchConversations(@Valid @RequestBody SearchConversationsQuery query) {
+    public Page<ConversationViewModel> searchConversations(@Valid SearchConversationsQuery query) {
         return conversationService.searchConversations(query);
+    }
+
+    @Operation(summary = "Search Initiated Conversations", security = { @SecurityRequirement(name = "bearer") })
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ConversationViewModel.class)) }),
+                    @ApiResponse(responseCode = "401", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
+                    @ApiResponse(responseCode = "403", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
+            }
+    )
+    @PreAuthorize(AUTH_PREFIX + AuthorityConstants.CAN_SEARCH_INITIATED_CONVERSATIONS + AUTH_SUFFIX)
+    @RequestMapping(path = "/initiated", method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    public Page<ConversationViewModel> searchInitiatedConversations(@Valid SearchInitiatedConversationsQuery query) {
+        return conversationService.searchInitiatedConversations(query);
     }
 
     @Operation(summary = "Close Conversation", security = { @SecurityRequirement(name = "bearer") })
@@ -78,7 +94,7 @@ public class ConversationController {
                     @ApiResponse(responseCode = "422", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationErrorResponse.class)) })
             }
     )
-    @PreAuthorize(AUTH_PREFIX + AuthorityConstants.CAN_INITIATE_CONVERSATION + AUTH_SUFFIX)
+    @PreAuthorize(AUTH_PREFIX + AuthorityConstants.CAN_CLOSE_CONVERSATION + AUTH_SUFFIX)
     @RequestMapping(path = "/close", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
     public ConversationViewModel closeConversation(@Valid @RequestBody CloseConversationRequest request) {
