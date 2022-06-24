@@ -42,27 +42,34 @@ public class MessageServiceImpl implements MessageService {
         Conversation conversation = getConversation(request.getConversationId());
         User loggedInUser = currentUserService.getCurrentUser();
 
-        verifyLoggedInUserIsPartOfConversation(conversation, loggedInUser);
+        Agent agent = agentService.getAgent(loggedInUser);
+        boolean loggedInUserIsAgent = agent != null;
+
+        verifyLoggedInUserIsPartOfConversation(conversation, loggedInUser, loggedInUserIsAgent);
 
         if (ConversationStatus.INITIATED.equals(conversation.getStatus())) {
-            Agent agent = agentService.getAgent(loggedInUser);
-
-            if (agent != null) {
-                assignAgentToConversation(conversation, agent);
+            if (loggedInUserIsAgent) {
+                setStatusActiveAndAssignAgentToConversation(conversation, agent);
             }
         }
 
-        return MessageViewModel.from(
-                createMessage(conversation, loggedInUser, request.getMessageBody())
-        );
+        Message message = createMessage(conversation, loggedInUser, request.getMessageBody());
+
+        return MessageViewModel.from(message);
     }
 
-    private void verifyLoggedInUserIsPartOfConversation(Conversation conversation, User loggedInUser) {
-        if (
-            (loggedInUser.equals(conversation.getUser()) && conversation.getAgent() == null) ||
-            (conversation.getAgent() != null && loggedInUser.equals(conversation.getAgent().getUser()))
-        ) {
-            throw new BadRequestException("User is not part of this conversation");
+    private void verifyLoggedInUserIsPartOfConversation(Conversation conversation, User loggedInUser, boolean loggedInUserIsAgent) {
+        if (conversation.getAgent() == null) {
+            if (loggedInUser.getId() != conversation.getUser().getId() && !loggedInUserIsAgent){
+                throw new BadRequestException("User is not part of this conversation");
+            }
+        }
+
+        if (conversation.getAgent() != null) {
+            if (loggedInUser.getId() != conversation.getUser().getId() &&
+                    loggedInUser.getId() !=  conversation.getAgent().getUser().getId()){
+                throw new BadRequestException("User is not part of this conversation");
+            }
         }
     }
 
@@ -71,11 +78,10 @@ public class MessageServiceImpl implements MessageService {
                 .orElseThrow(() -> new NotFoundException(String.format("Conversation with id: '%s' not found", conversationId)));
     }
 
-    private void assignAgentToConversation(Conversation conversation, Agent agent) {
-        conversation.setAgent(agent);
-        conversation.setStatus(ConversationStatus.ACTIVE);
-
-        conversationRepository.save(conversation);
+    private void setStatusActiveAndAssignAgentToConversation(Conversation conversation, Agent agent) {
+        conversationRepository.updateAgentIdAndStatus(
+                conversation.getId(), agent.getId(), ConversationStatus.ACTIVE
+        );
     }
 
 }
