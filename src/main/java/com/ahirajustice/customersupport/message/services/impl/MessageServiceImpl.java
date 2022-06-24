@@ -16,6 +16,7 @@ import com.ahirajustice.customersupport.message.viewmodels.MessageViewModel;
 import com.ahirajustice.customersupport.user.services.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +38,7 @@ public class MessageServiceImpl implements MessageService {
         return messageRepository.save(message);
     }
 
+    @Transactional
     @Override
     public MessageViewModel sendMessage(SendMessageRequest request) {
         Conversation conversation = getConversation(request.getConversationId());
