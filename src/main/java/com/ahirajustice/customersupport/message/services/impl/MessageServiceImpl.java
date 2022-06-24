@@ -15,6 +15,7 @@ import com.ahirajustice.customersupport.message.services.MessageService;
 import com.ahirajustice.customersupport.message.viewmodels.MessageViewModel;
 import com.ahirajustice.customersupport.user.services.CurrentUserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ public class MessageServiceImpl implements MessageService {
     private final ConversationRepository conversationRepository;
     private final CurrentUserService currentUserService;
     private final AgentService agentService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Override
     public Message createMessage(Conversation conversation, User user, String body) {
@@ -57,7 +59,18 @@ public class MessageServiceImpl implements MessageService {
 
         Message message = createMessage(conversation, loggedInUser, request.getMessageBody());
 
+        pushMessageToOtherUserInConversation(conversation, loggedInUser, message);
+
         return MessageViewModel.from(message);
+    }
+
+    private void pushMessageToOtherUserInConversation(Conversation conversation, User sender, Message message) {
+        User receiver = getReceiver(conversation, sender);
+        simpMessagingTemplate.convertAndSend("/topic/messages/" + receiver.getUsername(), message.toString().getBytes());
+    }
+
+    private User getReceiver(Conversation conversation, User sender) {
+        return conversation.getUser().equals(sender) ? conversation.getAgent().getUser() : conversation.getUser();
     }
 
     private void verifyLoggedInUserIsPartOfConversation(Conversation conversation, User loggedInUser, boolean loggedInUserIsAgent) {

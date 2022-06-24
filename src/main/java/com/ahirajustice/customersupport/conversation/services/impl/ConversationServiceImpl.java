@@ -18,6 +18,7 @@ import com.ahirajustice.customersupport.user.services.CurrentUserService;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,7 @@ public class ConversationServiceImpl implements ConversationService {
     private final ConversationRepository conversationRepository;
     private final CurrentUserService currentUserService;
     private final MessageService messageService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Override
     @Transactional
@@ -38,6 +40,8 @@ public class ConversationServiceImpl implements ConversationService {
 
         Conversation conversation = createConversation(loggedInUser);
         messageService.createMessage(conversation, loggedInUser, request.getMessageBody());
+
+        pushInitiatedConversationToAgents(conversation);
 
         return ConversationViewModel.from(conversation);
     }
@@ -49,6 +53,10 @@ public class ConversationServiceImpl implements ConversationService {
                 .build();
 
         return conversationRepository.save(conversation);
+    }
+
+    private void pushInitiatedConversationToAgents(Conversation conversation) {
+        simpMessagingTemplate.convertAndSend("/topic/conversations", conversation);
     }
 
     @Override
