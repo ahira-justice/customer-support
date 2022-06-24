@@ -10,8 +10,8 @@ import com.ahirajustice.customersupport.common.repositories.AgentRepository;
 import com.ahirajustice.customersupport.user.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 
 @Service
 @RequiredArgsConstructor
