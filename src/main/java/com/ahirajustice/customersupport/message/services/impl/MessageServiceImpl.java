@@ -97,7 +97,7 @@ public class MessageServiceImpl implements MessageService {
             }
         }
     }
-    
+
     private void setStatusActiveAndAssignAgentToConversation(Conversation conversation, Agent agent) {
         conversationRepository.updateAgentIdAndStatus(
                 conversation.getId(), agent.getId(), ConversationStatus.ACTIVE
@@ -144,7 +144,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     private boolean filterMessagesByLoggedInUser(Message message, User loggedInUser) {
-        boolean loggedInUserIsUserInConversation = loggedInUser.equals(message.getConversation().getUser());
+        boolean loggedInUserIsUserInConversation = message.getConversation().getUser().equals(loggedInUser);
 
         boolean loggedInUserIsAgentInConversation = false;
 
