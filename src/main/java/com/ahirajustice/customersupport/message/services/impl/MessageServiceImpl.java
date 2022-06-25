@@ -4,7 +4,6 @@ import com.ahirajustice.customersupport.agent.services.AgentService;
 import com.ahirajustice.customersupport.common.entities.Agent;
 import com.ahirajustice.customersupport.common.entities.Conversation;
 import com.ahirajustice.customersupport.common.entities.Message;
-import com.ahirajustice.customersupport.common.entities.QMessage;
 import com.ahirajustice.customersupport.common.entities.User;
 import com.ahirajustice.customersupport.common.enums.ConversationStatus;
 import com.ahirajustice.customersupport.common.exceptions.BadRequestException;
@@ -17,12 +16,14 @@ import com.ahirajustice.customersupport.message.requests.SendMessageRequest;
 import com.ahirajustice.customersupport.message.services.MessageService;
 import com.ahirajustice.customersupport.message.viewmodels.MessageViewModel;
 import com.ahirajustice.customersupport.user.services.CurrentUserService;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -73,26 +74,42 @@ public class MessageServiceImpl implements MessageService {
     public Page<MessageViewModel> searchMessages(SearchMessagesQuery query) {
         User loggedInUser = currentUserService.getCurrentUser();
 
-        BooleanExpression expression = (BooleanExpression) query.getPredicate();
-        expression = expression.and(
-                QMessage.message.conversation.agent.user.id.eq(loggedInUser.getId())
-                        .or(QMessage.message.conversation.user.id.eq(loggedInUser.getId()))
-        );
+        Page<Message> messages = messageRepository.findAll(query.getPredicate(), query.getPageable());
 
-        return messageRepository.findAll(expression, query.getPageable()).map(MessageViewModel::from);
+        return new PageImpl<>(
+                messages.stream()
+                        .filter(message -> filterMessagesByLoggedInUser(message, loggedInUser))
+                        .collect(Collectors.toList()),
+                messages.getPageable(),
+                messages.getTotalElements()
+        ).map(MessageViewModel::from);
     }
 
     @Override
     public Page<MessageViewModel> searchMessagesByConversation(SearchMessagesByConversationQuery query) {
         User loggedInUser = currentUserService.getCurrentUser();
 
-        BooleanExpression expression = (BooleanExpression) query.getPredicate();
-        expression = expression.and(
-                QMessage.message.conversation.agent.user.id.eq(loggedInUser.getId())
-                        .or(QMessage.message.conversation.user.id.eq(loggedInUser.getId()))
-        );
+        Page<Message> messages = messageRepository.findAll(query.getPredicate(), query.getPageable());
 
-        return messageRepository.findAll(expression, query.getPageable()).map(MessageViewModel::from);
+        return new PageImpl<>(
+                messages.stream()
+                        .filter(message -> filterMessagesByLoggedInUser(message, loggedInUser))
+                        .collect(Collectors.toList()),
+                messages.getPageable(),
+                messages.getTotalElements()
+        ).map(MessageViewModel::from);
+    }
+
+    private boolean filterMessagesByLoggedInUser(Message message, User loggedInUser) {
+        boolean loggedInUserIsUserInConversation = loggedInUser.equals(message.getConversation().getUser());
+
+        boolean loggedInUserIsAgentInConversation = false;
+
+        if (message.getConversation().getAgent() != null){
+            loggedInUserIsAgentInConversation = message.getConversation().getAgent().getUser().equals(loggedInUser);
+        }
+
+        return loggedInUserIsUserInConversation || loggedInUserIsAgentInConversation;
     }
 
     private void pushMessageToOtherUserInConversation(Conversation conversation, User sender, Message message) {
