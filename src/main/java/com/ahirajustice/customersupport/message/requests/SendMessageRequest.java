@@ -16,7 +16,7 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class SendMessageRequest {
 
-    @Min(1)
+    @Min(value = 1, message = "conversationId is required; must be greater than or equal to 1")
     private long conversationId;
     @NotBlank(message = "messageBody is required")
     private String messageBody;

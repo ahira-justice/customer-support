@@ -22,7 +22,7 @@ import javax.validation.constraints.Min;
 @AllArgsConstructor
 public class SearchMessagesByConversationQuery extends BaseQuery {
 
-    @Min(1)
+    @Min(value = 1, message = "conversationId is required; must be greater than or equal to 1")
     private long conversationId;
     private String body;
 
