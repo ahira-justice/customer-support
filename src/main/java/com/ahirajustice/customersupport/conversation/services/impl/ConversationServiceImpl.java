@@ -64,7 +64,7 @@ public class ConversationServiceImpl implements ConversationService {
         User loggedInUser = currentUserService.getCurrentUser();
 
         BooleanExpression expression = (BooleanExpression) query.getPredicate();
-        expression.and(
+        expression = expression.and(
                 QConversation.conversation.agent.user.id.eq(loggedInUser.getId())
                         .or(QConversation.conversation.user.id.eq(loggedInUser.getId()))
         );
@@ -74,7 +74,7 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     public Page<ConversationViewModel> searchInitiatedConversations(SearchInitiatedConversationsQuery query) {
-        return conversationRepository.findAll( query.getPredicate(), query.getPageable()).map(ConversationViewModel::from);
+        return conversationRepository.findAll(query.getPredicate(), query.getPageable()).map(ConversationViewModel::from);
     }
 
     @Override

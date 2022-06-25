@@ -16,7 +16,7 @@ import javax.validation.constraints.Min;
 @AllArgsConstructor
 public class CloseConversationRequest {
 
-    @Min(0)
+    @Min(1)
     private long conversationId;
 
 }
