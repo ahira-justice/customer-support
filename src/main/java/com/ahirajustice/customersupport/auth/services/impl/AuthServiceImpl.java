@@ -16,6 +16,7 @@ import com.ahirajustice.customersupport.common.utils.CommonUtils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -63,7 +64,7 @@ public class AuthServiceImpl implements AuthService {
             authToken.setRoles(claims.get("roles", ArrayList.class));
             authToken.setAuthorities(claims.get("authorities", ArrayList.class));
         }
-        catch(ExpiredJwtException ex){
+        catch(ExpiredJwtException | MalformedJwtException ex){
             return authToken;
         }
 
