@@ -50,6 +50,10 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public MessageViewModel sendMessage(SendMessageRequest request) {
         Conversation conversation = getConversation(request.getConversationId());
+
+        if (ConversationStatus.CLOSED.equals(conversation.getStatus()))
+            throw new BadRequestException("Cannot send message to closed conversation");
+
         User loggedInUser = currentUserService.getCurrentUser();
 
         Agent agent = agentService.getAgent(loggedInUser);
@@ -123,14 +127,14 @@ public class MessageServiceImpl implements MessageService {
 
     private void verifyLoggedInUserIsPartOfConversation(Conversation conversation, User loggedInUser, boolean loggedInUserIsAgent) {
         if (conversation.getAgent() == null) {
-            if (loggedInUser.getId() != conversation.getUser().getId() && !loggedInUserIsAgent){
+            if (loggedInUser.getId() != conversation.getUser().getId() && !loggedInUserIsAgent) {
                 throw new BadRequestException("User is not part of this conversation");
             }
         }
 
         if (conversation.getAgent() != null) {
             if (loggedInUser.getId() != conversation.getUser().getId() &&
-                    loggedInUser.getId() !=  conversation.getAgent().getUser().getId()){
+                    loggedInUser.getId() !=  conversation.getAgent().getUser().getId()) {
                 throw new BadRequestException("User is not part of this conversation");
             }
         }
