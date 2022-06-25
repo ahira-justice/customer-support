@@ -3,6 +3,8 @@ package com.ahirajustice.customersupport.message.controllers;
 import com.ahirajustice.customersupport.common.constants.AuthorityConstants;
 import com.ahirajustice.customersupport.common.error.ErrorResponse;
 import com.ahirajustice.customersupport.common.error.ValidationErrorResponse;
+import com.ahirajustice.customersupport.message.queries.SearchMessagesByConversationQuery;
+import com.ahirajustice.customersupport.message.queries.SearchMessagesQuery;
 import com.ahirajustice.customersupport.message.requests.SendMessageRequest;
 import com.ahirajustice.customersupport.message.services.MessageService;
 import com.ahirajustice.customersupport.message.viewmodels.MessageViewModel;
@@ -14,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,6 +52,36 @@ public class MessageController {
     @ResponseStatus(HttpStatus.OK)
     public MessageViewModel sendMessage(@Valid @RequestBody SendMessageRequest request) {
         return messageService.sendMessage(request);
+    }
+
+    @Operation(summary = "Search Messages", security = { @SecurityRequirement(name = "bearer") })
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = MessageViewModel.class)) }),
+                    @ApiResponse(responseCode = "401", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
+                    @ApiResponse(responseCode = "403", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
+            }
+    )
+    @PreAuthorize(AUTH_PREFIX + AuthorityConstants.CAN_SEARCH_MESSAGES + AUTH_SUFFIX)
+    @RequestMapping(path = "", method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    public Page<MessageViewModel> searchMessages(@Valid SearchMessagesQuery query) {
+        return messageService.searchMessages(query);
+    }
+
+    @Operation(summary = "Search Messages By Conversation", security = { @SecurityRequirement(name = "bearer") })
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = MessageViewModel.class)) }),
+                    @ApiResponse(responseCode = "401", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
+                    @ApiResponse(responseCode = "403", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
+            }
+    )
+    @PreAuthorize(AUTH_PREFIX + AuthorityConstants.CAN_SEARCH_MESSAGES + AUTH_SUFFIX)
+    @RequestMapping(path = "by-conversation", method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    public Page<MessageViewModel> searchMessagesByConversation(@Valid SearchMessagesByConversationQuery query) {
+        return messageService.searchMessagesByConversation(query);
     }
 
 }
