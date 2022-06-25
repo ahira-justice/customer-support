@@ -25,7 +25,7 @@ public class SearchUsersQuery extends BaseQuery {
     private Boolean isEmailVerified;
     private String firstName;
     private String lastName;
-    private String role;
+    private long roleId;
 
     @Override
     protected Class<? extends BaseEntity> getSortEntityClass() {
@@ -54,8 +54,8 @@ public class SearchUsersQuery extends BaseQuery {
             expression = expression.and(QUser.user.lastName.contains(lastName));
         }
 
-        if (StringUtils.isNotBlank(role)) {
-            expression = expression.and(QUser.user.role.name.contains(role));
+        if (roleId > 0) {
+            expression = expression.and(QUser.user.role.id.eq(roleId));
         }
 
         return expression;
