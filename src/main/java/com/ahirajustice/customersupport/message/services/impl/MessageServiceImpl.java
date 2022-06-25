@@ -51,8 +51,7 @@ public class MessageServiceImpl implements MessageService {
     public MessageViewModel sendMessage(SendMessageRequest request) {
         Conversation conversation = getConversation(request.getConversationId());
 
-        if (ConversationStatus.CLOSED.equals(conversation.getStatus()))
-            throw new BadRequestException("Cannot send message to closed conversation");
+        verifyConversationNotClosed(conversation);
 
         User loggedInUser = currentUserService.getCurrentUser();
 
@@ -72,6 +71,46 @@ public class MessageServiceImpl implements MessageService {
         pushMessageToOtherUserInConversation(conversation, loggedInUser, message);
 
         return MessageViewModel.from(message);
+    }
+
+    private Conversation getConversation(long conversationId) {
+        return conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new NotFoundException(String.format("Conversation with id: '%s' not found", conversationId)));
+    }
+
+    private void verifyConversationNotClosed(Conversation conversation) {
+        if (ConversationStatus.CLOSED.equals(conversation.getStatus()))
+            throw new BadRequestException("Cannot send message to closed conversation");
+    }
+
+    private void verifyLoggedInUserIsPartOfConversation(Conversation conversation, User loggedInUser, boolean loggedInUserIsAgent) {
+        if (conversation.getAgent() == null) {
+            if (loggedInUser.getId() != conversation.getUser().getId() && !loggedInUserIsAgent) {
+                throw new BadRequestException("User is not part of this conversation");
+            }
+        }
+
+        if (conversation.getAgent() != null) {
+            if (loggedInUser.getId() != conversation.getUser().getId() &&
+                    loggedInUser.getId() !=  conversation.getAgent().getUser().getId()) {
+                throw new BadRequestException("User is not part of this conversation");
+            }
+        }
+    }
+    
+    private void setStatusActiveAndAssignAgentToConversation(Conversation conversation, Agent agent) {
+        conversationRepository.updateAgentIdAndStatus(
+                conversation.getId(), agent.getId(), ConversationStatus.ACTIVE
+        );
+    }
+
+    private void pushMessageToOtherUserInConversation(Conversation conversation, User sender, Message message) {
+        User receiver = getReceiver(conversation, sender);
+        simpMessagingTemplate.convertAndSend("/topic/messages/" + receiver.getUsername(), message.toString().getBytes());
+    }
+
+    private User getReceiver(Conversation conversation, User sender) {
+        return conversation.getUser().equals(sender) ? conversation.getAgent().getUser() : conversation.getUser();
     }
 
     @Override
@@ -114,41 +153,6 @@ public class MessageServiceImpl implements MessageService {
         }
 
         return loggedInUserIsUserInConversation || loggedInUserIsAgentInConversation;
-    }
-
-    private void pushMessageToOtherUserInConversation(Conversation conversation, User sender, Message message) {
-        User receiver = getReceiver(conversation, sender);
-        simpMessagingTemplate.convertAndSend("/topic/messages/" + receiver.getUsername(), message.toString().getBytes());
-    }
-
-    private User getReceiver(Conversation conversation, User sender) {
-        return conversation.getUser().equals(sender) ? conversation.getAgent().getUser() : conversation.getUser();
-    }
-
-    private void verifyLoggedInUserIsPartOfConversation(Conversation conversation, User loggedInUser, boolean loggedInUserIsAgent) {
-        if (conversation.getAgent() == null) {
-            if (loggedInUser.getId() != conversation.getUser().getId() && !loggedInUserIsAgent) {
-                throw new BadRequestException("User is not part of this conversation");
-            }
-        }
-
-        if (conversation.getAgent() != null) {
-            if (loggedInUser.getId() != conversation.getUser().getId() &&
-                    loggedInUser.getId() !=  conversation.getAgent().getUser().getId()) {
-                throw new BadRequestException("User is not part of this conversation");
-            }
-        }
-    }
-
-    private Conversation getConversation(long conversationId) {
-        return conversationRepository.findById(conversationId)
-                .orElseThrow(() -> new NotFoundException(String.format("Conversation with id: '%s' not found", conversationId)));
-    }
-
-    private void setStatusActiveAndAssignAgentToConversation(Conversation conversation, Agent agent) {
-        conversationRepository.updateAgentIdAndStatus(
-                conversation.getId(), agent.getId(), ConversationStatus.ACTIVE
-        );
     }
 
 }
