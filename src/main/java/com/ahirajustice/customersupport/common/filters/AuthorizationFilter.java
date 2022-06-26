@@ -8,6 +8,7 @@ import com.ahirajustice.customersupport.common.error.ErrorResponse;
 import com.ahirajustice.customersupport.common.exceptions.UnauthorizedException;
 import com.ahirajustice.customersupport.common.repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,7 +30,10 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class AuthorizationFilter extends GenericFilterBean {
+
+    private final AuthService authService;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain)
@@ -38,7 +42,17 @@ public class AuthorizationFilter extends GenericFilterBean {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        AuthService authService = (AuthService) SpringApplicationContext.getBean("authServiceImpl");
+        if ("OPTIONS".equals(request.getMethod())) {
+            response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+            response.addHeader("Access-Control-Allow-Headers", "Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization");
+            response.addHeader("Access-Control-Allow-Origin", "*");
+        }
+        else {
+            response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+            response.addHeader("Access-Control-Allow-Headers", "Content-Type");
+            response.addHeader("Access-Control-Allow-Origin", "*");
+            response.addHeader("Access-Control-Max-Age", "10");
+        }
 
         if (!excludeFromAuth(request.getRequestURI(), request.getMethod())) {
             String header = request.getHeader(SecurityConstants.HEADER_STRING);
