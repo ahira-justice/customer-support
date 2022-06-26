@@ -1,5 +1,6 @@
 package com.ahirajustice.customersupport.common.config;
 
+import com.ahirajustice.customersupport.common.context.SpringApplicationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +13,8 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.converter.SimpleMessageConverter;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
@@ -50,6 +53,12 @@ public class AppConfig {
 		mapper.registerModule(new JavaTimeModule());
 
 		return mapper;
+	}
+
+	@Bean
+	public SimpMessagingTemplate simpMessagingTemplate(SimpMessagingTemplate simpMessagingTemplate) {
+		simpMessagingTemplate.setMessageConverter(new SimpleMessageConverter());
+		return simpMessagingTemplate;
 	}
 
 }
