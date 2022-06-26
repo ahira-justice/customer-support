@@ -4,9 +4,12 @@ import com.ahirajustice.customersupport.common.entities.Conversation;
 import com.ahirajustice.customersupport.common.entities.QConversation;
 import com.ahirajustice.customersupport.common.entities.User;
 import com.ahirajustice.customersupport.common.enums.ConversationStatus;
+import com.ahirajustice.customersupport.common.enums.WebSocketEventType;
 import com.ahirajustice.customersupport.common.exceptions.NotFoundException;
 import com.ahirajustice.customersupport.common.exceptions.ValidationException;
+import com.ahirajustice.customersupport.common.models.WebSocketEvent;
 import com.ahirajustice.customersupport.common.repositories.ConversationRepository;
+import com.ahirajustice.customersupport.common.utils.ObjectMapperUtil;
 import com.ahirajustice.customersupport.conversation.queries.SearchConversationsQuery;
 import com.ahirajustice.customersupport.conversation.queries.SearchInitiatedConversationsQuery;
 import com.ahirajustice.customersupport.conversation.requests.CloseConversationRequest;
@@ -15,6 +18,7 @@ import com.ahirajustice.customersupport.conversation.services.ConversationServic
 import com.ahirajustice.customersupport.conversation.viewmodels.ConversationViewModel;
 import com.ahirajustice.customersupport.message.services.MessageService;
 import com.ahirajustice.customersupport.user.services.CurrentUserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,6 +32,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class ConversationServiceImpl implements ConversationService {
 
+    private final ObjectMapper objectMapper;
     private final ConversationRepository conversationRepository;
     private final CurrentUserService currentUserService;
     private final MessageService messageService;
@@ -41,7 +46,7 @@ public class ConversationServiceImpl implements ConversationService {
         Conversation conversation = createConversation(loggedInUser);
         messageService.createMessage(conversation, loggedInUser, request.getMessageBody());
 
-        pushInitiatedConversationToAgents(conversation);
+        pushInitiatedConversationEventToAgents(conversation);
 
         return ConversationViewModel.from(conversation);
     }
@@ -55,8 +60,14 @@ public class ConversationServiceImpl implements ConversationService {
         return conversationRepository.save(conversation);
     }
 
-    private void pushInitiatedConversationToAgents(Conversation conversation) {
-        simpMessagingTemplate.convertAndSend("/topic/conversations", conversation);
+    private void pushInitiatedConversationEventToAgents(Conversation conversation) {
+        WebSocketEvent event = WebSocketEvent.builder()
+                .eventId(conversation.getId())
+                .eventType(WebSocketEventType.INITIATED_CONVERSATION)
+                .build();
+        String payload = ObjectMapperUtil.serialize(objectMapper, event);
+
+        simpMessagingTemplate.convertAndSend("/topic/conversations", payload.getBytes());
     }
 
     @Override

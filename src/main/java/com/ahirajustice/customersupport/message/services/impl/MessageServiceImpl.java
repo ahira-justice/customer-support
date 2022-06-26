@@ -6,16 +6,20 @@ import com.ahirajustice.customersupport.common.entities.Conversation;
 import com.ahirajustice.customersupport.common.entities.Message;
 import com.ahirajustice.customersupport.common.entities.User;
 import com.ahirajustice.customersupport.common.enums.ConversationStatus;
+import com.ahirajustice.customersupport.common.enums.WebSocketEventType;
 import com.ahirajustice.customersupport.common.exceptions.BadRequestException;
 import com.ahirajustice.customersupport.common.exceptions.NotFoundException;
+import com.ahirajustice.customersupport.common.models.WebSocketEvent;
 import com.ahirajustice.customersupport.common.repositories.ConversationRepository;
 import com.ahirajustice.customersupport.common.repositories.MessageRepository;
+import com.ahirajustice.customersupport.common.utils.ObjectMapperUtil;
 import com.ahirajustice.customersupport.message.queries.SearchMessagesByConversationQuery;
 import com.ahirajustice.customersupport.message.queries.SearchMessagesQuery;
 import com.ahirajustice.customersupport.message.requests.SendMessageRequest;
 import com.ahirajustice.customersupport.message.services.MessageService;
 import com.ahirajustice.customersupport.message.viewmodels.MessageViewModel;
 import com.ahirajustice.customersupport.user.services.CurrentUserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -29,6 +33,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
 
+    private final ObjectMapper objectMapper;
     private final MessageRepository messageRepository;
     private final ConversationRepository conversationRepository;
     private final CurrentUserService currentUserService;
@@ -68,7 +73,7 @@ public class MessageServiceImpl implements MessageService {
 
         Message message = createMessage(conversation, loggedInUser, request.getMessageBody());
 
-        pushMessageToOtherUserInConversation(conversation, loggedInUser, message);
+        pushMessageEventToOtherUserInConversation(conversation, loggedInUser, message);
 
         return MessageViewModel.from(message);
     }
@@ -104,9 +109,15 @@ public class MessageServiceImpl implements MessageService {
         );
     }
 
-    private void pushMessageToOtherUserInConversation(Conversation conversation, User sender, Message message) {
+    private void pushMessageEventToOtherUserInConversation(Conversation conversation, User sender, Message message) {
         User receiver = getReceiver(conversation, sender);
-        simpMessagingTemplate.convertAndSend("/topic/messages/" + receiver.getUsername(), message.toString().getBytes());
+        WebSocketEvent event = WebSocketEvent.builder()
+                .eventId(message.getId())
+                .eventType(WebSocketEventType.NEW_MESSAGE)
+                .build();
+        String payload = ObjectMapperUtil.serialize(objectMapper, event);
+
+        simpMessagingTemplate.convertAndSend("/topic/messages/" + receiver.getUsername(), payload.getBytes());
     }
 
     private User getReceiver(Conversation conversation, User sender) {
