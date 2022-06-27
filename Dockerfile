@@ -1,13 +1,14 @@
-FROM openjdk:8-jdk-alpine as build
+FROM adoptopenjdk/openjdk11:latest as build
 
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 COPY src src
 
+RUN chmod +x /mvnw
 RUN ./mvnw install -DskipTests
 
-FROM openjdk:8-jdk-alpine
+FROM adoptopenjdk/openjdk11:latest
 
 VOLUME /tmp
 
@@ -16,4 +17,5 @@ COPY --from=build target/*.jar app.jar
 EXPOSE 80
 EXPOSE 443
 
+USER root
 ENTRYPOINT ["java", "-jar", "/app.jar"]
