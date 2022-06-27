@@ -169,5 +169,4 @@ public class AuthorizationFilter extends GenericFilterBean {
         writer.print(errorResponseBody);
         writer.flush();
     }
-
 }
