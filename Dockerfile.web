@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-alpine as build
+FROM adoptopenjdk/openjdk11:latest as build
 
 COPY mvnw .
 COPY .mvn .mvn
@@ -7,7 +7,7 @@ COPY src src
 
 RUN ./mvnw install -DskipTests
 
-FROM openjdk:8-jdk-alpine
+FROM adoptopenjdk/openjdk11:latest
 
 VOLUME /tmp
 
