@@ -16,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 @AllArgsConstructor
 public class UserViewModel extends BaseViewModel {
 
+    private String username;
     private String email;
     private String firstName;
     private String lastName;

@@ -39,7 +39,7 @@ public class AuthController {
     )
     @RequestMapping(path = "/login", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
-    public LoginResponse externalLogin(@Valid @RequestBody LoginRequest request) {
+    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
     }
 
