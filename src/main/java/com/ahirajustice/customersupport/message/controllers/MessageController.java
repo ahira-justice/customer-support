@@ -9,6 +9,7 @@ import com.ahirajustice.customersupport.message.requests.SendMessageRequest;
 import com.ahirajustice.customersupport.message.services.MessageService;
 import com.ahirajustice.customersupport.message.viewmodels.MessageViewModel;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -57,7 +58,7 @@ public class MessageController {
     @Operation(summary = "Search Messages", security = { @SecurityRequirement(name = "bearer") })
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = MessageViewModel.class)) }),
+                    @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = MessageViewModel.class))) }),
                     @ApiResponse(responseCode = "401", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
                     @ApiResponse(responseCode = "403", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
             }
@@ -72,7 +73,7 @@ public class MessageController {
     @Operation(summary = "Search Messages By Conversation", security = { @SecurityRequirement(name = "bearer") })
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = MessageViewModel.class)) }),
+                    @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = MessageViewModel.class))) }),
                     @ApiResponse(responseCode = "401", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
                     @ApiResponse(responseCode = "403", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
             }
