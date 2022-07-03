@@ -1,7 +1,7 @@
 package com.ahirajustice.customersupport.conversation.services.impl;
 
 import com.ahirajustice.customersupport.common.entities.Conversation;
-import com.ahirajustice.customersupport.common.entities.QConversation;
+import com.ahirajustice.customersupport.common.entities.Message;
 import com.ahirajustice.customersupport.common.entities.User;
 import com.ahirajustice.customersupport.common.enums.ConversationStatus;
 import com.ahirajustice.customersupport.common.enums.WebSocketEventType;
@@ -19,14 +19,15 @@ import com.ahirajustice.customersupport.conversation.viewmodels.ConversationView
 import com.ahirajustice.customersupport.message.services.MessageService;
 import com.ahirajustice.customersupport.user.services.CurrentUserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -44,11 +45,11 @@ public class ConversationServiceImpl implements ConversationService {
         User loggedInUser = currentUserService.getCurrentUser();
 
         Conversation conversation = createConversation(loggedInUser);
-        messageService.createMessage(conversation, loggedInUser, request.getMessageBody());
+        Message message = messageService.createMessage(conversation, loggedInUser, request.getMessageBody());
 
         pushInitiatedConversationEventToAgents(conversation);
 
-        return ConversationViewModel.from(conversation);
+        return ConversationViewModel.from(conversation, message);
     }
 
     private Conversation createConversation(User user) {
@@ -74,18 +75,38 @@ public class ConversationServiceImpl implements ConversationService {
     public Page<ConversationViewModel> searchConversations(SearchConversationsQuery query) {
         User loggedInUser = currentUserService.getCurrentUser();
 
-        BooleanExpression expression = (BooleanExpression) query.getPredicate();
-        expression = expression.and(
-                QConversation.conversation.agent.user.id.eq(loggedInUser.getId())
-                        .or(QConversation.conversation.user.id.eq(loggedInUser.getId()))
-        );
+        Page<Conversation> conversations = conversationRepository.findAll(query.getPredicate(), query.getPageable());
 
-        return conversationRepository.findAll(expression, query.getPageable()).map(ConversationViewModel::from);
+        return new PageImpl<>(
+                conversations.stream()
+                        .filter(conversation -> filterConversationsByLoggedInUser(conversation, loggedInUser))
+                        .collect(Collectors.toList()),
+                conversations.getPageable(),
+                conversations.getTotalElements()
+        ).map(conversation -> ConversationViewModel.from(
+                conversation, messageService.getMostRecentMessage(conversation)
+        ));
+    }
+
+    private boolean filterConversationsByLoggedInUser(Conversation conversation, User loggedInUser) {
+        boolean loggedInUserIsUserInConversation = conversation.getUser().equals(loggedInUser);
+
+        boolean loggedInUserIsAgentInConversation = false;
+
+        if (conversation.getAgent() != null){
+            loggedInUserIsAgentInConversation = conversation.getAgent().getUser().equals(loggedInUser);
+        }
+
+        return loggedInUserIsUserInConversation || loggedInUserIsAgentInConversation;
     }
 
     @Override
     public Page<ConversationViewModel> searchInitiatedConversations(SearchInitiatedConversationsQuery query) {
-        return conversationRepository.findAll(query.getPredicate(), query.getPageable()).map(ConversationViewModel::from);
+        return conversationRepository
+                .findAll(query.getPredicate(), query.getPageable())
+                .map(conversation -> ConversationViewModel.from(
+                        conversation, messageService.getMostRecentMessage(conversation)
+                ));
     }
 
     @Override
@@ -100,7 +121,9 @@ public class ConversationServiceImpl implements ConversationService {
             throw new ValidationException("Cannot close un-attended conversation");
         }
 
-        return ConversationViewModel.from(closeConversation(conversation));
+        return ConversationViewModel.from(
+                closeConversation(conversation), messageService.getMostRecentMessage(conversation)
+        );
     }
 
     private Conversation closeConversation(Conversation conversation) {

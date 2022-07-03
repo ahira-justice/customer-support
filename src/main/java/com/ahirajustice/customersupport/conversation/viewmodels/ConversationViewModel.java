@@ -2,8 +2,10 @@ package com.ahirajustice.customersupport.conversation.viewmodels;
 
 import com.ahirajustice.customersupport.agent.viewmodels.AgentViewModel;
 import com.ahirajustice.customersupport.common.entities.Conversation;
+import com.ahirajustice.customersupport.common.entities.Message;
 import com.ahirajustice.customersupport.common.enums.ConversationStatus;
 import com.ahirajustice.customersupport.common.viewmodels.BaseViewModel;
+import com.ahirajustice.customersupport.message.viewmodels.MessageViewModel;
 import com.ahirajustice.customersupport.user.viewmodels.UserViewModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,10 +25,11 @@ public class ConversationViewModel extends BaseViewModel {
 
     private AgentViewModel agent;
     private UserViewModel user;
+    private MessageViewModel mostRecentMessage;
     private ConversationStatus status;
     private LocalDateTime closedOn;
 
-    public static ConversationViewModel from(Conversation conversation) {
+    public static ConversationViewModel from(Conversation conversation, Message message) {
         ConversationViewModel response = new ConversationViewModel();
 
         BeanUtils.copyProperties(conversation, response);
@@ -35,6 +38,7 @@ public class ConversationViewModel extends BaseViewModel {
             response.setAgent(AgentViewModel.from(conversation.getAgent()));
 
         response.setUser(UserViewModel.from(conversation.getUser()));
+        response.setMostRecentMessage(MessageViewModel.from(message));
 
         return response;
     }

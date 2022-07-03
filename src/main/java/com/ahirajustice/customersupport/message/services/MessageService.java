@@ -19,4 +19,5 @@ public interface MessageService {
 
     Page<MessageViewModel> searchMessagesByConversation(SearchMessagesByConversationQuery query);
 
+    Message getMostRecentMessage(Conversation conversation);
 }

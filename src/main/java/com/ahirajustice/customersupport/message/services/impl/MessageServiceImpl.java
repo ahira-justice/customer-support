@@ -154,6 +154,11 @@ public class MessageServiceImpl implements MessageService {
         ).map(MessageViewModel::from);
     }
 
+    @Override
+    public Message getMostRecentMessage(Conversation conversation) {
+        return messageRepository.findFirstByConversationOrderByCreatedOnDesc(conversation);
+    }
+
     private boolean filterMessagesByLoggedInUser(Message message, User loggedInUser) {
         boolean loggedInUserIsUserInConversation = message.getConversation().getUser().equals(loggedInUser);
 
