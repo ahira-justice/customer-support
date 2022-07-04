@@ -111,6 +111,11 @@ public class MessageServiceImpl implements MessageService {
 
     private void pushMessageEventToOtherUserInConversation(Conversation conversation, User sender, Message message) {
         User receiver = getReceiver(conversation, sender);
+
+        if (receiver == null) {
+            return;
+        }
+
         WebSocketEvent event = WebSocketEvent.builder()
                 .eventId(message.getId())
                 .eventType(WebSocketEventType.NEW_MESSAGE)
@@ -121,7 +126,15 @@ public class MessageServiceImpl implements MessageService {
     }
 
     private User getReceiver(Conversation conversation, User sender) {
-        return conversation.getUser().equals(sender) ? conversation.getAgent().getUser() : conversation.getUser();
+        if (!conversation.getUser().equals(sender)) {
+            return conversation.getUser();
+        }
+        else if (conversation.getUser().equals(sender) && conversation.getAgent() != null) {
+            return conversation.getAgent().getUser();
+        }
+        else{
+            return null;
+        }
     }
 
     @Override
