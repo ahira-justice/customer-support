@@ -6,6 +6,7 @@ import com.ahirajustice.customersupport.common.entities.Conversation;
 import com.ahirajustice.customersupport.common.entities.Message;
 import com.ahirajustice.customersupport.common.entities.User;
 import com.ahirajustice.customersupport.common.enums.ConversationStatus;
+import com.ahirajustice.customersupport.common.enums.Roles;
 import com.ahirajustice.customersupport.common.enums.WebSocketEventType;
 import com.ahirajustice.customersupport.common.exceptions.BadRequestException;
 import com.ahirajustice.customersupport.common.exceptions.NotFoundException;
@@ -145,7 +146,7 @@ public class MessageServiceImpl implements MessageService {
 
         return new PageImpl<>(
                 messages.stream()
-                        .filter(message -> filterMessagesByLoggedInUser(message, loggedInUser))
+                        .filter(message -> loggedInUserIsUserInConversation(message, loggedInUser) || loggedInUserIsAgentInConversation(message, loggedInUser))
                         .collect(Collectors.toList()),
                 messages.getPageable(),
                 messages.getTotalElements()
@@ -154,13 +155,17 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public Page<MessageViewModel> searchMessagesByConversation(SearchMessagesByConversationQuery query) {
-        User loggedInUser = currentUserService.getCurrentUser();
-
         Page<Message> messages = messageRepository.findAll(query.getPredicate(), query.getPageable());
+
+        if (currentUserService.currentUserHasRole(Roles.AGENT)) {
+            return messages.map(MessageViewModel::from);
+        }
+
+        User loggedInUser = currentUserService.getCurrentUser();
 
         return new PageImpl<>(
                 messages.stream()
-                        .filter(message -> filterMessagesByLoggedInUser(message, loggedInUser))
+                        .filter(message -> loggedInUserIsUserInConversation(message, loggedInUser))
                         .collect(Collectors.toList()),
                 messages.getPageable(),
                 messages.getTotalElements()
@@ -172,16 +177,16 @@ public class MessageServiceImpl implements MessageService {
         return messageRepository.findFirstByConversationOrderByCreatedOnDesc(conversation);
     }
 
-    private boolean filterMessagesByLoggedInUser(Message message, User loggedInUser) {
-        boolean loggedInUserIsUserInConversation = message.getConversation().getUser().equals(loggedInUser);
+    private boolean loggedInUserIsUserInConversation(Message message, User loggedInUser) {
+        return message.getConversation().getUser().equals(loggedInUser);
+    }
 
-        boolean loggedInUserIsAgentInConversation = false;
-
+    private boolean loggedInUserIsAgentInConversation(Message message, User loggedInUser) {
         if (message.getConversation().getAgent() != null){
-            loggedInUserIsAgentInConversation = message.getConversation().getAgent().getUser().equals(loggedInUser);
+            return message.getConversation().getAgent().getUser().equals(loggedInUser);
         }
 
-        return loggedInUserIsUserInConversation || loggedInUserIsAgentInConversation;
+        return false;
     }
 
 }
