@@ -12,8 +12,6 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.converter.SimpleMessageConverter;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
@@ -51,12 +49,6 @@ public class AppConfig {
 		mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
 
 		return mapper;
-	}
-
-	@Bean
-	public SimpMessagingTemplate simpMessagingTemplate(SimpMessagingTemplate simpMessagingTemplate) {
-		simpMessagingTemplate.setMessageConverter(new SimpleMessageConverter());
-		return simpMessagingTemplate;
 	}
 
 }

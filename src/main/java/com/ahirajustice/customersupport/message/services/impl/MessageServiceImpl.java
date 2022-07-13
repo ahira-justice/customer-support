@@ -7,24 +7,19 @@ import com.ahirajustice.customersupport.common.entities.Message;
 import com.ahirajustice.customersupport.common.entities.User;
 import com.ahirajustice.customersupport.common.enums.ConversationStatus;
 import com.ahirajustice.customersupport.common.enums.Roles;
-import com.ahirajustice.customersupport.common.enums.WebSocketEventType;
 import com.ahirajustice.customersupport.common.exceptions.BadRequestException;
 import com.ahirajustice.customersupport.common.exceptions.NotFoundException;
-import com.ahirajustice.customersupport.common.models.WebSocketEvent;
 import com.ahirajustice.customersupport.common.repositories.ConversationRepository;
 import com.ahirajustice.customersupport.common.repositories.MessageRepository;
-import com.ahirajustice.customersupport.common.utils.ObjectMapperUtil;
 import com.ahirajustice.customersupport.message.queries.SearchMessagesByConversationQuery;
 import com.ahirajustice.customersupport.message.queries.SearchMessagesQuery;
 import com.ahirajustice.customersupport.message.requests.SendMessageRequest;
 import com.ahirajustice.customersupport.message.services.MessageService;
 import com.ahirajustice.customersupport.message.viewmodels.MessageViewModel;
 import com.ahirajustice.customersupport.user.services.CurrentUserService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,12 +29,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
 
-    private final ObjectMapper objectMapper;
     private final MessageRepository messageRepository;
     private final ConversationRepository conversationRepository;
     private final CurrentUserService currentUserService;
     private final AgentService agentService;
-    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Override
     public Message createMessage(Conversation conversation, User user, String body) {
@@ -111,31 +104,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     private void pushMessageEventToOtherUserInConversation(Conversation conversation, User sender, Message message) {
-        User receiver = getReceiver(conversation, sender);
 
-        if (receiver == null) {
-            return;
-        }
-
-        WebSocketEvent event = WebSocketEvent.builder()
-                .eventId(message.getId())
-                .eventType(WebSocketEventType.NEW_MESSAGE)
-                .build();
-        String payload = ObjectMapperUtil.serialize(objectMapper, event);
-
-        simpMessagingTemplate.convertAndSend("/topic/messages/" + receiver.getUsername(), payload.getBytes());
-    }
-
-    private User getReceiver(Conversation conversation, User sender) {
-        if (!conversation.getUser().equals(sender)) {
-            return conversation.getUser();
-        }
-        else if (conversation.getUser().equals(sender) && conversation.getAgent() != null) {
-            return conversation.getAgent().getUser();
-        }
-        else{
-            return null;
-        }
     }
 
     @Override
