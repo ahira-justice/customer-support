@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class AppProperties {
 
+    @Value("${app.config.ably.api-key}")
+    private String ablyApiKey;
+
     @Value("${app.config.access-token-expire-minutes}")
     private int accessTokenExpireMinutes;
 

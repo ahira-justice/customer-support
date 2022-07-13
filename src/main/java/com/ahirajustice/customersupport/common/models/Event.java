@@ -1,6 +1,6 @@
 package com.ahirajustice.customersupport.common.models;
 
-import com.ahirajustice.customersupport.common.enums.WebSocketEventType;
+import com.ahirajustice.customersupport.common.enums.EventType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,9 +12,10 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WebSocketEvent {
+public class Event {
 
     private long eventId;
-    private WebSocketEventType eventType;
+    private EventType eventType;
+    private Object payload;
 
 }

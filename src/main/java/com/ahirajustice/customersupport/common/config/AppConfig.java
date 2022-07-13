@@ -1,11 +1,14 @@
 package com.ahirajustice.customersupport.common.config;
 
 import com.ahirajustice.customersupport.common.context.SpringApplicationContext;
+import com.ahirajustice.customersupport.common.properties.AppProperties;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.ably.lib.rest.AblyRest;
+import io.ably.lib.types.AblyException;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -49,6 +52,11 @@ public class AppConfig {
 		mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
 
 		return mapper;
+	}
+
+	@Bean
+	public AblyRest ablyRest(AppProperties appProperties) throws AblyException {
+		return new AblyRest(appProperties.getAblyApiKey());
 	}
 
 }

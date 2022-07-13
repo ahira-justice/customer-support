@@ -4,9 +4,12 @@ import com.ahirajustice.customersupport.common.entities.Conversation;
 import com.ahirajustice.customersupport.common.entities.Message;
 import com.ahirajustice.customersupport.common.entities.User;
 import com.ahirajustice.customersupport.common.enums.ConversationStatus;
+import com.ahirajustice.customersupport.common.enums.EventType;
 import com.ahirajustice.customersupport.common.exceptions.NotFoundException;
 import com.ahirajustice.customersupport.common.exceptions.ValidationException;
+import com.ahirajustice.customersupport.common.models.Event;
 import com.ahirajustice.customersupport.common.repositories.ConversationRepository;
+import com.ahirajustice.customersupport.common.utils.ObjectMapperUtil;
 import com.ahirajustice.customersupport.conversation.queries.SearchConversationsQuery;
 import com.ahirajustice.customersupport.conversation.queries.SearchInitiatedConversationsQuery;
 import com.ahirajustice.customersupport.conversation.requests.CloseConversationRequest;
@@ -15,7 +18,12 @@ import com.ahirajustice.customersupport.conversation.services.ConversationServic
 import com.ahirajustice.customersupport.conversation.viewmodels.ConversationViewModel;
 import com.ahirajustice.customersupport.message.services.MessageService;
 import com.ahirajustice.customersupport.user.services.CurrentUserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.ably.lib.rest.AblyRest;
+import io.ably.lib.rest.Channel;
+import io.ably.lib.types.AblyException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
@@ -26,11 +34,14 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ConversationServiceImpl implements ConversationService {
 
+    private final ObjectMapper objectMapper;
     private final ConversationRepository conversationRepository;
     private final CurrentUserService currentUserService;
     private final MessageService messageService;
+    private final AblyRest ablyRest;
 
     @Override
     @Transactional
@@ -40,9 +51,11 @@ public class ConversationServiceImpl implements ConversationService {
         Conversation conversation = createConversation(loggedInUser);
         Message message = messageService.createMessage(conversation, loggedInUser, request.getMessageBody());
 
-        pushInitiatedConversationEventToAgents(conversation);
+        ConversationViewModel response = ConversationViewModel.from(conversation, message);
 
-        return ConversationViewModel.from(conversation, message);
+        pushInitiatedConversationEventToAgents(response);
+
+        return response;
     }
 
     private Conversation createConversation(User user) {
@@ -54,8 +67,21 @@ public class ConversationServiceImpl implements ConversationService {
         return conversationRepository.save(conversation);
     }
 
-    private void pushInitiatedConversationEventToAgents(Conversation conversation) {
-        
+    private void pushInitiatedConversationEventToAgents(ConversationViewModel conversation) {
+        Event event = Event.builder()
+                .eventId(conversation.getId())
+                .eventType(EventType.INITIATED_CONVERSATION)
+                .payload(conversation)
+                .build();
+
+        String eventPayload = ObjectMapperUtil.serialize(objectMapper, event);
+
+        try {
+            Channel channel = ablyRest.channels.get("conversations");
+            channel.publish(event.getEventType().name(), eventPayload);
+        } catch (AblyException ex) {
+            log.error(ex.getMessage(), ex);
+        }
     }
 
     @Override

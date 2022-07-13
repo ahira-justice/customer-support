@@ -7,17 +7,25 @@ import com.ahirajustice.customersupport.common.entities.Message;
 import com.ahirajustice.customersupport.common.entities.User;
 import com.ahirajustice.customersupport.common.enums.ConversationStatus;
 import com.ahirajustice.customersupport.common.enums.Roles;
+import com.ahirajustice.customersupport.common.enums.EventType;
 import com.ahirajustice.customersupport.common.exceptions.BadRequestException;
 import com.ahirajustice.customersupport.common.exceptions.NotFoundException;
+import com.ahirajustice.customersupport.common.models.Event;
 import com.ahirajustice.customersupport.common.repositories.ConversationRepository;
 import com.ahirajustice.customersupport.common.repositories.MessageRepository;
+import com.ahirajustice.customersupport.common.utils.ObjectMapperUtil;
 import com.ahirajustice.customersupport.message.queries.SearchMessagesByConversationQuery;
 import com.ahirajustice.customersupport.message.queries.SearchMessagesQuery;
 import com.ahirajustice.customersupport.message.requests.SendMessageRequest;
 import com.ahirajustice.customersupport.message.services.MessageService;
 import com.ahirajustice.customersupport.message.viewmodels.MessageViewModel;
 import com.ahirajustice.customersupport.user.services.CurrentUserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.ably.lib.rest.AblyRest;
+import io.ably.lib.rest.Channel;
+import io.ably.lib.types.AblyException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
@@ -27,12 +35,15 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MessageServiceImpl implements MessageService {
 
+    private final ObjectMapper objectMapper;
     private final MessageRepository messageRepository;
     private final ConversationRepository conversationRepository;
     private final CurrentUserService currentUserService;
     private final AgentService agentService;
+    private final AblyRest ablyRest;
 
     @Override
     public Message createMessage(Conversation conversation, User user, String body) {
@@ -67,9 +78,13 @@ public class MessageServiceImpl implements MessageService {
 
         Message message = createMessage(conversation, loggedInUser, request.getMessageBody());
 
-        pushMessageEventToOtherUserInConversation(conversation, loggedInUser, message);
+        User receiver = getReceiver(conversation, loggedInUser);
 
-        return MessageViewModel.from(message);
+        MessageViewModel response = MessageViewModel.from(message);
+
+        pushMessageEventToOtherUserInConversation(receiver, response);
+
+        return response;
     }
 
     private Conversation getConversation(long conversationId) {
@@ -103,8 +118,37 @@ public class MessageServiceImpl implements MessageService {
         );
     }
 
-    private void pushMessageEventToOtherUserInConversation(Conversation conversation, User sender, Message message) {
+    private void pushMessageEventToOtherUserInConversation(User receiver, MessageViewModel message) {
+        if (receiver == null) {
+            return;
+        }
 
+        Event event = Event.builder()
+                .eventId(message.getId())
+                .eventType(EventType.NEW_MESSAGE)
+                .payload(message)
+                .build();
+
+        String eventPayload = ObjectMapperUtil.serialize(objectMapper, event);
+
+        try {
+            Channel channel = ablyRest.channels.get(receiver.getUsername());
+            channel.publish(event.getEventType().name(), eventPayload);
+        } catch (AblyException ex) {
+            log.error(ex.getMessage(), ex);
+        }
+    }
+
+    private User getReceiver(Conversation conversation, User sender) {
+        if (!conversation.getUser().equals(sender)) {
+            return conversation.getUser();
+        }
+        else if (conversation.getUser().equals(sender) && conversation.getAgent() != null) {
+            return conversation.getAgent().getUser();
+        }
+        else{
+            return null;
+        }
     }
 
     @Override
