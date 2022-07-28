@@ -3,7 +3,6 @@ package com.ahirajustice.customersupport.common.filters;
 import com.ahirajustice.customersupport.auth.dtos.AuthToken;
 import com.ahirajustice.customersupport.auth.services.AuthService;
 import com.ahirajustice.customersupport.common.constants.SecurityConstants;
-import com.ahirajustice.customersupport.common.context.SpringApplicationContext;
 import com.ahirajustice.customersupport.common.error.ErrorResponse;
 import com.ahirajustice.customersupport.common.exceptions.UnauthorizedException;
 import com.ahirajustice.customersupport.common.repositories.UserRepository;
@@ -34,6 +33,7 @@ import java.util.stream.Collectors;
 public class AuthorizationFilter extends GenericFilterBean {
 
     private final AuthService authService;
+    private final UserRepository userRepository;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain)
@@ -147,7 +147,6 @@ public class AuthorizationFilter extends GenericFilterBean {
     }
 
     private boolean userExists(AuthToken token) {
-        UserRepository userRepository = (UserRepository) SpringApplicationContext.getBean("userRepository");
         return userRepository.findByUsername(token.getUsername()).isPresent();
     }
 
