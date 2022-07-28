@@ -1,6 +1,5 @@
 package com.ahirajustice.customersupport.common.config;
 
-import com.ahirajustice.customersupport.common.context.SpringApplicationContext;
 import com.ahirajustice.customersupport.common.properties.AppProperties;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
@@ -23,11 +22,6 @@ public class AppConfig {
 	@Bean
 	public BCryptPasswordEncoder bCryptPasswordEncoder() {
 		return new BCryptPasswordEncoder();
-	}
-
-	@Bean
-	public SpringApplicationContext springApplicationContext(){
-		return new SpringApplicationContext();
 	}
 
 	@Bean
