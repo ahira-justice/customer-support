@@ -34,7 +34,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
             Optional<String> usernameExists = getUsernameFromToken(header);
             if (!usernameExists.isPresent())
-                throw new ValidationException("Invalid access token");
+                throw new ValidationException("Invalid user access token");
 
             String username = usernameExists.get();
             Optional<User> userExists = userRepository.findByUsername(username);
