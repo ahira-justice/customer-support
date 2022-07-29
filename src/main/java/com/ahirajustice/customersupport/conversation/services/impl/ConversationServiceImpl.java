@@ -92,7 +92,7 @@ public class ConversationServiceImpl implements ConversationService {
 
         return new PageImpl<>(
                 conversations.stream()
-                        .filter(conversation -> filterConversationsByLoggedInUser(conversation, loggedInUser))
+                        .filter(conversation -> loggedInUserIsUserInConversation(conversation, loggedInUser) || loggedInUserIsAgentInConversation(conversation, loggedInUser))
                         .collect(Collectors.toList()),
                 conversations.getPageable(),
                 conversations.getTotalElements()
@@ -101,16 +101,16 @@ public class ConversationServiceImpl implements ConversationService {
         ));
     }
 
-    private boolean filterConversationsByLoggedInUser(Conversation conversation, User loggedInUser) {
-        boolean loggedInUserIsUserInConversation = conversation.getUser().equals(loggedInUser);
+    private boolean loggedInUserIsUserInConversation(Conversation conversation, User loggedInUser) {
+        return conversation.getUser().equals(loggedInUser);
+    }
 
-        boolean loggedInUserIsAgentInConversation = false;
-
+    private boolean loggedInUserIsAgentInConversation(Conversation conversation, User loggedInUser) {
         if (conversation.getAgent() != null){
-            loggedInUserIsAgentInConversation = conversation.getAgent().getUser().equals(loggedInUser);
+            return conversation.getAgent().getUser().equals(loggedInUser);
         }
 
-        return loggedInUserIsUserInConversation || loggedInUserIsAgentInConversation;
+        return false;
     }
 
     @Override
