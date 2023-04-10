@@ -43,7 +43,8 @@ public class DatabaseSeeder implements ApplicationRunner {
                 }
 
                 authorityRepository.save(authority);
-            } catch (Exception ignored) {
+            }
+            catch (Exception ignored) {
 
             }
         }
@@ -55,26 +56,32 @@ public class DatabaseSeeder implements ApplicationRunner {
         List<Authority> authorities = authorityRepository.findAll();
 
         for (Role role : roles) {
-            Optional<Role> roleExists = roleRepository.findByName(role.getName());
+            try {
 
-            Set<Authority> roleAuthorities = new HashSet<>();
+                Optional<Role> roleExists = roleRepository.findByName(role.getName());
 
-            for (Authority roleAuthority : role.getAuthorities()) {
-                for (Authority authority : authorities) {
-                    if (authority.getName().equals(roleAuthority.getName())) {
-                        roleAuthorities.add(authority);
+                Set<Authority> roleAuthorities = new HashSet<>();
+
+                for (Authority roleAuthority : role.getAuthorities()) {
+                    for (Authority authority : authorities) {
+                        if (authority.getName().equals(roleAuthority.getName())) {
+                            roleAuthorities.add(authority);
+                        }
                     }
                 }
+
+                if (roleExists.isPresent()) {
+                    Role currentRole = roleExists.get();
+                    currentRole.setAuthorities(roleAuthorities);
+                    roleRepository.save(currentRole);
+
+                } else {
+                    role.setAuthorities(roleAuthorities);
+                    roleRepository.save(role);
+                }
             }
+            catch (Exception ignored) {
 
-            if (roleExists.isPresent()) {
-                Role currentRole = roleExists.get();
-                currentRole.setAuthorities(roleAuthorities);
-                roleRepository.save(currentRole);
-
-            } else {
-                role.setAuthorities(roleAuthorities);
-                roleRepository.save(role);
             }
         }
     }
@@ -98,7 +105,8 @@ public class DatabaseSeeder implements ApplicationRunner {
             superAdmin.setRole(superAdminRole);
 
             userRepository.save(superAdmin);
-        } catch (Exception ignored) {
+        }
+        catch (Exception ignored) {
 
         }
     }
