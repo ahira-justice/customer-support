@@ -2,7 +2,6 @@ version: "3.4"
 
 services:
   customer-support:
-    container_name: customer-support
     image: ${DOCKER_REGISTRY-}customer-support:latest
     build:
       context: .

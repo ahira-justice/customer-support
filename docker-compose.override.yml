@@ -4,6 +4,13 @@ services:
   customer-support:
     env_file:
       - .dockerenv
+    expose:
+      - "80"
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - customer-support
     ports:
-      - "32620:80"
-      - "32621:443"
+      - "32620:32620"
