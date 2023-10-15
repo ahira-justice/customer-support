@@ -33,9 +33,9 @@ import java.util.stream.Stream;
 public abstract class BaseQuery {
 
     @Min(0)
-    private int pageIndex = 0;
+    private int page = 0;
     @Min(1)
-    private int pageSize = 10;
+    private int size = 10;
     private List<@NotBlank String> sort;
 
     protected abstract Class<? extends BaseEntity> getSortEntityClass();
@@ -49,7 +49,7 @@ public abstract class BaseQuery {
 
     public Pageable getPageable() {
         List<Sort.Order> sortOrders = validateSortFields();
-        return PageRequest.of(pageIndex, pageSize, Sort.by(sortOrders));
+        return PageRequest.of(page, size, Sort.by(sortOrders));
     }
 
     public List<Sort.Order> validateSortFields() {
