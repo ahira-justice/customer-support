@@ -1,7 +1,7 @@
 package com.ahirajustice.customersupport.common.filters;
 
-import com.ahirajustice.customersupport.auth.dtos.AuthToken;
-import com.ahirajustice.customersupport.auth.services.AuthService;
+import com.ahirajustice.customersupport.modules.auth.dtos.AuthToken;
+import com.ahirajustice.customersupport.modules.auth.services.AuthService;
 import com.ahirajustice.customersupport.common.constants.SecurityConstants;
 import com.ahirajustice.customersupport.common.error.ErrorResponse;
 import com.ahirajustice.customersupport.common.exceptions.UnauthorizedException;
