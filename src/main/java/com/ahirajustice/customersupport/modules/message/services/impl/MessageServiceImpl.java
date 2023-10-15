@@ -27,11 +27,8 @@ import io.ably.lib.types.AblyException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -154,52 +151,26 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public Page<MessageViewModel> searchMessages(SearchMessagesQuery query) {
         User loggedInUser = currentUserService.getCurrentUser();
+        query.setLoggedInUserUsername(loggedInUser.getUsername());
 
-        Page<Message> messages = messageRepository.findAll(query.getPredicate(), query.getPageable());
-
-        return new PageImpl<>(
-                messages.stream()
-                        .filter(message -> loggedInUserIsUserInConversation(message, loggedInUser) || loggedInUserIsAgentInConversation(message, loggedInUser))
-                        .collect(Collectors.toList()),
-                messages.getPageable(),
-                messages.getTotalElements()
-        ).map(MessageViewModel::from);
+        return messageRepository.findAll(query.getPredicate(), query.getPageable())
+                .map(MessageViewModel::from);
     }
 
     @Override
     public Page<MessageViewModel> searchMessagesByConversation(SearchMessagesByConversationQuery query) {
-        Page<Message> messages = messageRepository.findAll(query.getPredicate(), query.getPageable());
-
-        if (currentUserService.currentUserHasRole(Roles.AGENT)) {
-            return messages.map(MessageViewModel::from);
-        }
-
         User loggedInUser = currentUserService.getCurrentUser();
 
-        return new PageImpl<>(
-                messages.stream()
-                        .filter(message -> loggedInUserIsUserInConversation(message, loggedInUser))
-                        .collect(Collectors.toList()),
-                messages.getPageable(),
-                messages.getTotalElements()
-        ).map(MessageViewModel::from);
+        if (!currentUserService.currentUserHasRole(Roles.AGENT))
+            query.setLoggedInUserUsername(loggedInUser.getUsername());
+
+        return messageRepository.findAll(query.getPredicate(), query.getPageable())
+                .map(MessageViewModel::from);
     }
 
     @Override
     public Message getMostRecentMessage(Conversation conversation) {
         return messageRepository.findFirstByConversationOrderByCreatedOnDesc(conversation);
-    }
-
-    private boolean loggedInUserIsUserInConversation(Message message, User loggedInUser) {
-        return message.getConversation().getUser().equals(loggedInUser);
-    }
-
-    private boolean loggedInUserIsAgentInConversation(Message message, User loggedInUser) {
-        if (message.getConversation().getAgent() != null){
-            return message.getConversation().getAgent().getUser().equals(loggedInUser);
-        }
-
-        return false;
     }
 
 }

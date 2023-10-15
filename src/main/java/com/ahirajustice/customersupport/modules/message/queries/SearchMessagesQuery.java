@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 @AllArgsConstructor
 public class SearchMessagesQuery extends BaseQuery {
 
+    private String loggedInUserUsername;
     private String body;
 
     @Override
@@ -29,6 +30,12 @@ public class SearchMessagesQuery extends BaseQuery {
 
     @Override
     protected Predicate getPredicate(BooleanExpression expression) {
+        expression = expression.and(
+                QMessage.message.conversation.user.username.eq(loggedInUserUsername).or(
+                        QMessage.message.conversation.agent.user.username.eq(loggedInUserUsername)
+                )
+        );
+
         if (StringUtils.isNotBlank(body)) {
             expression = expression.and(QMessage.message.body.contains(body));
         }

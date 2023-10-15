@@ -22,6 +22,7 @@ import javax.validation.constraints.Min;
 @AllArgsConstructor
 public class SearchMessagesByConversationQuery extends BaseQuery {
 
+    private String loggedInUserUsername;
     @Min(value = 1, message = "conversationId is required; must be greater than or equal to 1")
     private long conversationId;
     private String body;
@@ -34,6 +35,10 @@ public class SearchMessagesByConversationQuery extends BaseQuery {
     @Override
     protected Predicate getPredicate(BooleanExpression expression) {
         expression = expression.and(QMessage.message.conversation.id.eq(conversationId));
+
+        if (StringUtils.isNotBlank(loggedInUserUsername)) {
+            expression = expression.and(QMessage.message.conversation.user.username.eq(loggedInUserUsername));
+        }
 
         if (StringUtils.isNotBlank(body)) {
             expression = expression.and(QMessage.message.body.contains(body));

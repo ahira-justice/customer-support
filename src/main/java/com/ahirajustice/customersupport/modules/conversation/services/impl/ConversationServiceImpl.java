@@ -1,5 +1,6 @@
 package com.ahirajustice.customersupport.modules.conversation.services.impl;
 
+import com.ahirajustice.customersupport.common.constants.ChannelConstants;
 import com.ahirajustice.customersupport.common.entities.Conversation;
 import com.ahirajustice.customersupport.common.entities.Message;
 import com.ahirajustice.customersupport.common.entities.User;
@@ -25,12 +26,10 @@ import io.ably.lib.types.AblyException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -77,7 +76,7 @@ public class ConversationServiceImpl implements ConversationService {
         String eventPayload = ObjectMapperUtil.serialize(objectMapper, event);
 
         try {
-            Channel channel = ablyRest.channels.get("conversations");
+            Channel channel = ablyRest.channels.get(ChannelConstants.CONVERSATIONS);
             channel.publish(event.getEventType().name(), eventPayload);
         } catch (AblyException ex) {
             log.error(ex.getMessage(), ex);
@@ -87,30 +86,14 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public Page<ConversationViewModel> searchConversations(SearchConversationsQuery query) {
         User loggedInUser = currentUserService.getCurrentUser();
+        query.setLoggedInUserUsername(loggedInUser.getUsername());
 
-        Page<Conversation> conversations = conversationRepository.findAll(query.getPredicate(), query.getPageable());
-
-        return new PageImpl<>(
-                conversations.stream()
-                        .filter(conversation -> loggedInUserIsUserInConversation(conversation, loggedInUser) || loggedInUserIsAgentInConversation(conversation, loggedInUser))
-                        .collect(Collectors.toList()),
-                conversations.getPageable(),
-                conversations.getTotalElements()
-        ).map(conversation -> ConversationViewModel.from(
-                conversation, messageService.getMostRecentMessage(conversation)
-        ));
-    }
-
-    private boolean loggedInUserIsUserInConversation(Conversation conversation, User loggedInUser) {
-        return conversation.getUser().equals(loggedInUser);
-    }
-
-    private boolean loggedInUserIsAgentInConversation(Conversation conversation, User loggedInUser) {
-        if (conversation.getAgent() != null){
-            return conversation.getAgent().getUser().equals(loggedInUser);
-        }
-
-        return false;
+        return conversationRepository.findAll(query.getPredicate(), query.getPageable())
+                .map(
+                        conversation -> ConversationViewModel.from(
+                                conversation, messageService.getMostRecentMessage(conversation)
+                        )
+                );
     }
 
     @Override
