@@ -17,14 +17,13 @@ public class AblyAuthServiceImpl implements AblyAuthService {
     private final AblyRest ablyRest;
 
     @Override
-    public Auth.TokenRequest getAblyTokenRequest() {
-        Auth.TokenParams tokenParams = new Auth.TokenParams();
-
+    public Auth.TokenDetails getAblyToken() {
         try {
-            return ablyRest.auth.createTokenRequest(tokenParams, null);
+            Auth.TokenParams tokenParams = new Auth.TokenParams();
+            return ablyRest.auth.requestToken(tokenParams, null);
         } catch (AblyException ex) {
             log.error(ex.getMessage(), ex);
-            throw new ConfigurationException("Error occurred getting Ably TokenRequest");
+            throw new ConfigurationException("Error occurred getting ably token");
         }
     }
 

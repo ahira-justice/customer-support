@@ -32,10 +32,10 @@ public class AblyAuthController {
                     @ApiResponse(responseCode = "401", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)) }),
             }
     )
-    @RequestMapping(path = "/token-request", method = RequestMethod.GET)
+    @RequestMapping(path = "/token", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
-    public Auth.TokenRequest getAblyTokenRequest() {
-        return ablyAuthService.getAblyTokenRequest();
+    public Auth.TokenDetails getAblyToken() {
+        return ablyAuthService.getAblyToken();
     }
 
 }
