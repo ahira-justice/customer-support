@@ -1,5 +1,6 @@
 package com.ahirajustice.customersupport.common.filters;
 
+import com.ahirajustice.customersupport.common.utils.SecurityUtils;
 import com.ahirajustice.customersupport.modules.auth.dtos.AuthToken;
 import com.ahirajustice.customersupport.modules.auth.services.AuthService;
 import com.ahirajustice.customersupport.common.constants.SecurityConstants;
@@ -9,6 +10,7 @@ import com.ahirajustice.customersupport.common.repositories.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
+@Order(1)
 public class AuthorizationFilter extends GenericFilterBean {
 
     private final AuthService authService;
@@ -129,18 +132,12 @@ public class AuthorizationFilter extends GenericFilterBean {
         };
     }
 
-    private boolean excludeFromAuth(String requestURI, String requestMethod) {
-        for (String url : SecurityConstants.EXCLUDE_FROM_AUTH_URLS) {
-            String excludeURI = url.split(", ")[0];
-            String excludeMethod = url.split(", ")[1];
+    private boolean excludeFromAuth(String requestUri, String requestMethod) {
+        for (String uriMethodCsv : SecurityConstants.EXCLUDE_FROM_AUTH_URLS) {
+            if (!SecurityUtils.uriMatch(requestUri, requestMethod, uriMethodCsv))
+                continue;
 
-            if (excludeURI.equals(requestURI) && excludeMethod.equals(requestMethod)){
-                return true;
-            }
-
-            if (excludeURI.endsWith("/**") && requestURI.startsWith(excludeURI.replace("/**", "")) && excludeMethod.equals(requestMethod)){
-                return true;
-            }
+            return true;
         }
 
         return false;
